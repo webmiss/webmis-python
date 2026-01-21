@@ -5,7 +5,8 @@ s=$1
 index="main.py"
 config="server.ini"
 cli="cli.py"
-package="python-dateutil flask flask_cors PyJWT redis wheel DBUtils pymysql websockets websocket-client qrcode Image zxing oss2"
+package="flask flask-cors"
+# package="python-dateutil flask flask_cors PyJWT redis wheel DBUtils pymysql websockets websocket-client qrcode Image zxing oss2"
 
 # 运行
 if [ "$s" == "serve" ]; then
