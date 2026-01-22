@@ -2,10 +2,10 @@
 
 # 配置
 s=$1
-index="main.py"
+index="web_dev.py"
 config="server.ini"
 cli="cli.py"
-package="flask flask-cors"
+package="watchdog"
 # package="python-dateutil flask flask_cors PyJWT redis wheel DBUtils pymysql websockets websocket-client qrcode Image zxing oss2"
 
 # 运行

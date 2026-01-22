@@ -3,9 +3,9 @@ CHCP 65001 >nul
 
 REM 配置
 set s=%1%
-set index=main.py
+set index=web_dev.py
 set cli=cli.py
-set package=python-dateutil flask flask_cors PyJWT redis wheel DBUtils pymysql websockets websocket-client qrcode Image zxing oss2
+set package=watchdog redis
 
 REM 运行
  if "%s%"=="serve" (

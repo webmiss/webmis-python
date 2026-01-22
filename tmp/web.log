@@ -1,0 +1,93 @@
+*** Starting uWSGI 2.0.31 (64bit) on [Thu Jan 22 15:34:56 2026] ***
+compiled with version: 15.2.1 20251112 on 16 December 2025 09:14:25
+os: Linux-6.18.5-arch1-1 #1 SMP PREEMPT_DYNAMIC Sun, 11 Jan 2026 17:10:53 +0000
+nodename: webmis
+machine: x86_64
+clock source: unix
+pcre jit disabled
+detected number of CPU cores: 16
+current working directory: /home/webmis/works/www/webmis/flask
+writing pidfile to ./tmp/web.pid
+detected binary path: /usr/bin/uwsgi
+chdir() to ./
+*** WARNING: you are running uWSGI without its master process manager ***
+your processes number limit is 60963
+your memory page size is 4096 bytes
+detected max file descriptor number: 524288
+lock engine: pthread robust mutexes
+thunder lock: disabled (you can enable it with --thunder-lock)
+uwsgi socket 0 bound to UNIX address ./tmp/web.sock fd 3
+your server socket listen backlog is limited to 100 connections
+your mercy for graceful operations on workers is 60 seconds
+mapped 291680 bytes (284 KB) for 4 cores
+*** Operational MODE: preforking ***
+*** no app loaded. going in full dynamic mode ***
+*** uWSGI is running in multiple interpreter mode ***
+spawned uWSGI worker 1 (pid: 64580, cores: 1)
+spawned uWSGI worker 2 (pid: 64581, cores: 1)
+spawned uWSGI worker 3 (pid: 64582, cores: 1)
+spawned uWSGI worker 4 (pid: 64583, cores: 1)
+*** Starting uWSGI 2.0.31 (64bit) on [Thu Jan 22 15:39:18 2026] ***
+compiled with version: 15.2.1 20251112 on 16 December 2025 09:14:25
+os: Linux-6.18.5-arch1-1 #1 SMP PREEMPT_DYNAMIC Sun, 11 Jan 2026 17:10:53 +0000
+nodename: webmis
+machine: x86_64
+clock source: unix
+pcre jit disabled
+detected number of CPU cores: 16
+current working directory: /home/webmis/works/www/webmis/flask
+writing pidfile to ./tmp/web.pid
+detected binary path: /usr/bin/uwsgi
+chdir() to ./
+*** WARNING: you are running uWSGI without its master process manager ***
+your processes number limit is 60963
+your memory page size is 4096 bytes
+detected max file descriptor number: 524288
+lock engine: pthread robust mutexes
+thunder lock: disabled (you can enable it with --thunder-lock)
+uWSGI http bound on ./tmp/web.sock fd 4
+spawned uWSGI http 1 (pid: 64996)
+uwsgi socket 0 bound to TCP address 127.0.0.1:41711 (port auto-assigned) fd 3
+your server socket listen backlog is limited to 100 connections
+your mercy for graceful operations on workers is 60 seconds
+mapped 291680 bytes (284 KB) for 4 cores
+*** Operational MODE: preforking ***
+*** no app loaded. going in full dynamic mode ***
+*** uWSGI is running in multiple interpreter mode ***
+spawned uWSGI worker 1 (pid: 64995, cores: 1)
+spawned uWSGI worker 2 (pid: 64997, cores: 1)
+spawned uWSGI worker 3 (pid: 64998, cores: 1)
+spawned uWSGI worker 4 (pid: 64999, cores: 1)
+*** Starting uWSGI 2.0.31 (64bit) on [Thu Jan 22 15:39:52 2026] ***
+compiled with version: 15.2.1 20251112 on 16 December 2025 09:14:25
+os: Linux-6.18.5-arch1-1 #1 SMP PREEMPT_DYNAMIC Sun, 11 Jan 2026 17:10:53 +0000
+nodename: webmis
+machine: x86_64
+clock source: unix
+pcre jit disabled
+detected number of CPU cores: 16
+current working directory: /home/webmis/works/www/webmis/flask
+writing pidfile to ./tmp/web.pid
+detected binary path: /usr/bin/uwsgi
+chdir() to ./
+*** WARNING: you are running uWSGI without its master process manager ***
+your processes number limit is 60963
+your memory page size is 4096 bytes
+detected max file descriptor number: 524288
+lock engine: pthread robust mutexes
+thunder lock: disabled (you can enable it with --thunder-lock)
+uWSGI http bound on 127.0.0.1:9010 fd 4
+spawned uWSGI http 1 (pid: 65152)
+uwsgi socket 0 bound to TCP address 127.0.0.1:41963 (port auto-assigned) fd 3
+your server socket listen backlog is limited to 100 connections
+your mercy for graceful operations on workers is 60 seconds
+mapped 291680 bytes (284 KB) for 4 cores
+*** Operational MODE: preforking ***
+*** no app loaded. going in full dynamic mode ***
+*** uWSGI is running in multiple interpreter mode ***
+spawned uWSGI worker 1 (pid: 65151, cores: 1)
+spawned uWSGI worker 2 (pid: 65153, cores: 1)
+spawned uWSGI worker 3 (pid: 65154, cores: 1)
+spawned uWSGI worker 4 (pid: 65155, cores: 1)
+-- unavailable modifier requested: 0 --
+-- unavailable modifier requested: 0 --
