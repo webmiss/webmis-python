@@ -36,7 +36,7 @@ webmis-python/
 ├── bash                   // Linux/MacOS 启动脚本
 ├── cmd.bat                // Windows 启动脚本
 ├── cli.py                 // 命令行启动文件
-├── server.ini.py          // uWsgi 配置文件
-├── web_dev.py             // 开发热重载: python web_dev.py
+├── server.ini.py          // uWsgi 配置文件( 生产环境 )
+├── web_dev.py             // 热重载( 开发环境 ): python web_dev.py
 └── web.py                 // Web启动文件
 ```
