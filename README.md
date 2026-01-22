@@ -3,8 +3,8 @@
 
 ## 安装
 ```bash
-$ git clone https://github.com/webmiss/webmis-flask.git
-$ cd webmis-flask
+$ git clone https://github.com/webmiss/webmis-python.git
+$ cd webmis-python
 $ ./bash install
 ```
 
