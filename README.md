@@ -19,7 +19,7 @@ $ ./bash install
 ## 项目结构
 ```plaintext
 webmis-python/
-├── app                          // 项目
+├── app
 │    ├── config                 // 配置文件
 │    ├── modules                // 模块
 │    ├── task                   // 命令行任务
