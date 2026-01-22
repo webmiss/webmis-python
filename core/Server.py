@@ -1,6 +1,7 @@
 from wsgiref.simple_server import make_server
 from core.Base import Base
 from core.Router import Router
+from app.config.Env import Env
 import importlib
 
 # WSGI服务器类
@@ -35,6 +36,7 @@ class WSGIServer(Base):
 
   # 运行
   def run(self, host: str = '127.0.0.1', port: int = 8000):
+    if(Env.mode=='dev'): self.Print('Local:', f"http://{host}:{port}")
     server = make_server(host, port, self)
     server.serve_forever()
 
