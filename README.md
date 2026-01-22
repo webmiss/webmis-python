@@ -15,3 +15,28 @@ $ ./bash install
 # Windows
 .\cmd serve
 ```
+
+## 项目结构
+```plaintext
+webmis-python/
+├── app                    // 项目
+│    ├── config           // 配置文件
+│    ├── modules          // 模块
+│    ├── task             // 命令行任务
+│    └── views            // 视图文件
+├── core
+│    ├── Base.py          // 基础类
+│    ├── Controller.py    // 基础控制器
+│    ├── Router.py        // HMVC 路由
+│    ├── RouterCli.py     // Cli 路由
+│    ├── Server.py        // Web 服务类
+│    └── View.py          // 基础视图
+├── public                 // 静态资源
+├── tmp                    // uWsgi 缓存目录
+├── bash                   // Linux/MacOS 启动脚本
+├── cmd.bat                // Windows 启动脚本
+├── cli.py                 // 命令行启动文件
+├── server.ini.py          // uWsgi 配置文件
+├── web_dev.py             // 开发热重载: python web_dev.py
+└── web.py                 // Web启动文件
+```
