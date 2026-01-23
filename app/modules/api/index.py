@@ -1,4 +1,5 @@
 from core.Controller import Controller
+from flask import request
 
 # 接口
 class index(Controller):

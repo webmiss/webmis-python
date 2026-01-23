@@ -1,11 +1,11 @@
-from wsgiref.simple_server import make_server
 from core.Base import Base
+from core.Controller import Controller
 from core.Router import Router
-from app.config.Env import Env
-import importlib
+import json, importlib
+import urllib.parse
 
 # WSGI服务器类
-class WSGIServer(Base):
+class WSGIApplication(Controller):
 
   __name: str = 'server'      # 名称
 
@@ -15,6 +15,20 @@ class WSGIServer(Base):
     path = environ.get('PATH_INFO', '/')
     if path == '/': path = '/home/index/index'
     module_name, controller_name, method_name, params = Router().parse_url(path)
+    # Get 参数
+    Controller.get_raw = urllib.parse.parse_qs(environ.get('QUERY_STRING', ''))
+    # Post 参数
+    post_params = {}
+    if environ.get('REQUEST_METHOD') == 'POST':
+      content_len = int(environ.get('CONTENT_LENGTH', 0)) if environ.get('CONTENT_LENGTH', 0) else 0
+      if content_len > 0:
+        post_raw = environ['wsgi.input'].read(content_len).decode('utf-8')
+        content_type = environ.get('CONTENT_TYPE', '')
+        if 'application/x-www-form-urlencoded' in content_type:
+          post_params = urllib.parse.parse_qs(post_raw)
+        elif 'application/json' in content_type:
+          post_params = json.loads(post_raw) if post_raw else {}
+    Controller.post_raw = post_params
    
     try:
       # 动态控制器类
@@ -34,9 +48,5 @@ class WSGIServer(Base):
       start_response('404 Not Found OK', [('Content-Type', 'text/html; charset=utf-8')])
       return [b"404 Not Found"]
 
-  # 运行
-  def run(self, host: str = '127.0.0.1', port: int = 8000):
-    if(Env.mode=='dev'): self.Print('Local:', f"http://{host}:{port}")
-    server = make_server(host, port, self)
-    server.serve_forever()
-
+# 实例化
+app = WSGIApplication()
