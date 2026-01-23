@@ -40,6 +40,7 @@ webmis-python/
 ├── cmd.bat                      // Windows 启动脚本
 ├── cli.py                       // 命令行: python cli.py 控制器 函数 参数...
 ├── server.ini                   // uWsgi 配置文件( 生产环境 )
-├── web_dev.py                   // 热重载( 开发环境 ): python web_dev.py
-└── web.py                       // Web启动文件
+├── run_dev.py                   // 热重载( 开发环境 ): python run_dev.py
+├── run.py                       // Web启动文件
+└── server.ini                   // uWsgi 配置文件( 生产环境 )
 ```

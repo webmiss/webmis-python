@@ -2,7 +2,7 @@
 
 # 配置
 s=$1
-index="web_dev.py"
+index="run_dev.py"
 config="server.ini"
 cli="cli.py"
 package="watchdog"

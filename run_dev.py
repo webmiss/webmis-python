@@ -3,7 +3,7 @@ from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 
 # 热重载
-ENTRY_FILE = "web.py"
+ENTRY_FILE = "run.py"
 PYTHON_EXEC = sys.executable 
 PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
 process = None

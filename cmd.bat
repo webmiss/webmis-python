@@ -3,7 +3,7 @@ CHCP 65001 >nul
 
 REM 配置
 set s=%1%
-set index=web_dev.py
+set index=run_dev.py
 set cli=cli.py
 set package=watchdog redis
 
