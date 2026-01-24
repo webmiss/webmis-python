@@ -3,7 +3,8 @@
 # 配置
 s=$1
 index="run_dev.py"
-config="server.ini"
+config="uwsgi/uwsgi.ini"
+pid="uwsgi/uwsgi.pid"
 cli="cli.py"
 package="watchdog"
 # package="python-dateutil flask flask_cors PyJWT redis wheel DBUtils pymysql websockets websocket-client qrcode Image zxing oss2"
@@ -22,10 +23,10 @@ elif [ "$s" == "install" ]; then
   }
 # 启动
 elif [ "$s" == "start" ]; then
-  uwsgi --ini $config 2>&1 &
+  uwsgi --ini $config
 # 停止
 elif [ "$s" == "stop" ]; then
-  ps -aux | grep uwsgi | grep -v grep | awk {'print $2'} | xargs kill
+  uwsgi --ini $pid
 # Socket-运行
 elif [ "$s" == "socket" ]; then
   {

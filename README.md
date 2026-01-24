@@ -35,12 +35,10 @@ webmis-python/
 │    ├── Server.py              // Web 服务类
 │    └── View.py                // 基础视图
 ├── public                       // 静态资源
-├── tmp                          // uWsgi 缓存目录
+├── uwsgi                        // uWsgi 配置
 ├── bash                         // Linux/MacOS 启动脚本
 ├── cmd.bat                      // Windows 启动脚本
 ├── cli.py                       // 命令行: python cli.py 控制器 函数 参数...
-├── server.ini                   // uWsgi 配置文件( 生产环境 )
 ├── run_dev.py                   // 热重载( 开发环境 ): python run_dev.py
-├── run.py                       // Web启动文件
-└── server.ini                   // uWsgi 配置文件( 生产环境 )
+└── run.py                       // Web启动文件
 ```
