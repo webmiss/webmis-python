@@ -3,9 +3,9 @@ from core.View import View
 from app.config.Env import Env
 
 # 网站
-class index(Controller):
+class Index(Controller):
 
   # 首页
-  def index(self):
+  def Index(self):
     context: dict = {"title": Env.title, "copy": Env.copy}
     return View().render('home/index', context)

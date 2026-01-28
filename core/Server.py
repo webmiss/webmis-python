@@ -7,7 +7,7 @@ import urllib.parse
 # WSGI服务器类
 class WSGIApplication(Controller):
 
-  __name: str = 'server'      # 名称
+  __name: str = 'Server'      # 名称
 
   # 自动执行
   def __call__(self, environ: dict, start_response: callable) -> bytes:
@@ -32,7 +32,8 @@ class WSGIApplication(Controller):
    
     try:
       # 动态控制器类
-      module_name = f"app.modules.{module_name.lower()}.{controller_name.lower()}"
+      module_name = f"app.modules.{module_name.lower()}.{controller_name}"
+      print(module_name, controller_name, method_name)
       controller_module = importlib.import_module(module_name)
       controller_cls = getattr(controller_module, controller_name)
       # 实例化控制器

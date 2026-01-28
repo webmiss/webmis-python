@@ -4,5 +4,5 @@ from core.Controller import Controller
 class index(Controller):
 
   # 首页
-  def index(self):
+  def Index(self):
     return self.GetJSON({'code':0, 'msg':'Python Admin'})

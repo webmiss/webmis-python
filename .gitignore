@@ -1,4 +1,4 @@
 *__pycache__
 public/upload/*
-tmp
+uwsgi/uwsgi.log
 !.gitkeep
