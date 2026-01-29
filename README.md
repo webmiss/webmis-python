@@ -30,6 +30,7 @@ webmis-python/
 ├── core
 │    ├── Base.py                // 基础类
 │    ├── Controller.py          // 基础控制器
+│    ├── Model.py               // 基础模型
 │    ├── Router.py              // HMVC 路由
 │    ├── RouterCli.py           // Cli 路由
 │    ├── Server.py              // Web 服务类

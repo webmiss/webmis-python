@@ -16,7 +16,7 @@ def start_process():
     except:
       process.kill()
   # 启动新进程
-  print(f"\n[重启] 启动 {ENTRY_FILE} ...")
+  print(f"\n[ Server ] 重启 {ENTRY_FILE} ...")
   process = subprocess.Popen([PYTHON_EXEC, ENTRY_FILE], cwd=PROJECT_DIR)
 
 # 监听

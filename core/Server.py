@@ -33,7 +33,6 @@ class WSGIApplication(Controller):
     try:
       # 动态控制器类
       module_name = f"app.modules.{module_name.lower()}.{controller_name}"
-      print(module_name, controller_name, method_name)
       controller_module = importlib.import_module(module_name)
       controller_cls = getattr(controller_module, controller_name)
       # 实例化控制器
