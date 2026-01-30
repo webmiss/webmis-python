@@ -17,9 +17,14 @@ class Model(Base):
   __limit: str = ''     # 限制
   __args: tuple = ()    # 参数
   __sql: str = ''       # SQL语句
+  __keys: str = ''      # 添加-键
+  __values: str = ''    # 添加-值
+  __data: str = ''      # 更新-数据
+  __id: int = 0         # 自增ID
+  __nums: int = 0       # 影响行数
 
   # 获取连接
-  def DBConn(self, name: str = "default") -> bool:
+  def DBConn(self, name: str = "default") -> object :
     cfg = Db().Config(name)
     if self.conn is None:
       try:
@@ -33,8 +38,32 @@ class Model(Base):
         )
       except Error as e:
         self.Print('[ '+self.__name+' ] Conn:', e)
-    return self.conn is not None
+    return self.conn
   
+  # 执行SQL
+  def Exec(self, conn: object, sql: str, args: tuple = ()) -> any :
+    with conn.cursor() as cursor:
+      try:
+        cursor.execute(sql, args)
+        conn.commit()
+        self.__nums = cursor.rowcount
+        return cursor
+      except Error as e:
+        self.Print('[ '+self.__name+' ] Execute:', e)
+    return None
+
+  # 获取-SQL
+  def GetSql(self) -> tuple[str, tuple]:
+    return self.__sql, self.__args
+  
+  # 获取-自增ID
+  def GetID(self) -> int:
+    return self.__id
+  
+  # 获取-影响行数
+  def GetNums(self) -> int:
+    return self.__nums
+
   # 表
   def Table(self, table: str = '') -> None:
     self.__table = table
@@ -66,7 +95,7 @@ class Model(Base):
   # 条件
   def Where(self, where: str, *args) -> None:
     self.__where = ' WHERE '+where
-    self.__args += args
+    self.__args = args
 
   # 分组
   def Group(self, *group: str) -> None:
@@ -123,5 +152,158 @@ class Model(Base):
     return self.__sql, args
   
   # 查询-多条
-  def Find(self, param: tuple[str, tuple]=None) :
-    sql, args = param if param is not None else self.SelectSQL()
+  def Find(self, sql: str = '', args: tuple=None) :
+    # SQL
+    if sql == '':
+      sql, args = self.SelectSQL()
+    # 执行
+    res = []
+    cs = self.Exec(self.conn, sql, args)
+    if cs is None : return None
+    data = cs.fetchall()
+    cs.close()
+    # 结果
+    for d in data :
+      row = {}
+      for i,v in enumerate(d) :
+        row[cs.description[i][0]] = v
+      res.append(row)
+    return res
+
+  # 查询-单条
+  def FindFirst(self, sql: str = '', args: tuple=None) -> any :
+    # SQL
+    if sql == '':
+      self.Limit(0, 1)
+      sql, args = self.SelectSQL()
+    # 执行
+    res = {}
+    cs = self.Exec(self.conn, sql, args)
+    if cs is None : return None
+    data = cs.fetchone()
+    cs.close()
+    # 结果
+    if data is None : return None
+    for i,v in enumerate(data) :
+      res[cs.description[i][0]] = v
+    return res
+
+  # 添加-单条
+  def Values(self, data: dict) :
+    self.__args = ()
+    keys, vals = [], []
+    for k,v in data.items() :
+      keys.append(k)
+      vals.append('%s')
+      self.__args += (v,)
+    # 字段
+    self.__keys = ','.join(keys)
+    self.__values = ','.join(vals)
+
+  # 添加-多条
+  def ValuesAll(self, data: list) :
+    self.__args = ()
+    keys, vals, tmp = [], []
+    for d in data :
+      tmp = []
+      for k,v in d.items() :
+        keys.append(k)
+        tmp.append('%s')
+        self.__args += (v,)
+      vals.append('('+','.join(tmp)+')')
+    # 字段
+    self.__keys = ','.join(keys)
+    self.__values = ','.join(vals)
+
+  # 添加-SQL
+  def InsertSQL(self) -> tuple[str, tuple]:
+    # 验证
+    if self.__table == '' :
+      self.Print('[ '+self.__name+' ]', 'Insert: 表不能为空')
+      return '', ()
+    if self.__keys == '' or self.__values == '' :
+      self.Print('[ '+self.__name+' ]', 'Insert: 字段或值不能为空')
+      return '', ()
+    # SQL
+    self.__sql = 'INSERT INTO '+self.__table+' ('+self.__keys+') VALUES ('+self.__values+')'
+    self.__table = ''
+    self.__keys = ''
+    self.__values = ''
+    # 参数
+    args: tuple = self.__args
+    self.__args = ()
+    # 结果
+    return self.__sql, args
+  
+  # 添加-执行
+  def Insert(self, sql: str = '', args: tuple=None) :
+    if sql == '':
+      sql, args = self.InsertSQL()
+    self.Print(sql, args)
+
+  # 更新-数据
+  def Set(self, data: dict) :
+    self.__args = ()
+    vals = []
+    for k,v in data.items() :
+      vals.append(k+'=%s')
+      self.__args += (v,)
+    # 字段
+    self.__data = ','.join(vals)
+
+  # 更新-SQL
+  def UpdateSQL(self) -> tuple[str, tuple]:
+    # 验证
+    if self.__table == '' :
+      self.Print('[ '+self.__name+' ]', 'Update: 表不能为空')
+      return '', ()
+    if self.__data == '' :
+      self.Print('[ '+self.__name+' ]', 'Update: 字段或值不能为空')
+      return '', ()
+    if self.__where == '' :
+      self.Print('[ '+self.__name+' ]', 'Update: 条件不能为空')
+      return '', ()
+    # SQL
+    self.__sql = 'UPDATE '+self.__table+' SET '+self.__data+self.__where
+    # 重置
+    self.__table = ''
+    self.__data = ''
+    self.__where = ''
+    # 参数
+    args: tuple = self.__args
+    self.__args = ()
+    # 结果
+    return self.__sql, args
+
+
+  # 更新-执行
+  def Update(self, sql: str = '', args: tuple=None) :
+    if sql == '':
+      sql, args = self.UpdateSQL()
+    self.Print(sql, args)
+
+  # 删除-SQL
+  def DeleteSQL(self) -> tuple[str, tuple]:
+    # 验证
+    if self.__table == '' :
+      self.Print('[ '+self.__name+' ]', 'Delete: 表不能为空')
+      return '', ()
+    if self.__where == '' :
+      self.Print('[ '+self.__name+' ]', 'Delete: 条件不能为空')
+      return '', ()
+    # SQL
+    self.__sql = 'DELETE FROM '+self.__table+self.__where
+    # 重置
+    self.__table = ''
+    self.__where = ''
+    # 参数
+    args: tuple = self.__args
+    self.__args = ()
+    # 结果
+    return self.__sql, args
+
+  # 删除-执行
+  def Delete(self, sql: str = '', args: tuple=None) :
+    if sql == '':
+      sql, args = self.DeleteSQL()
+    self.Print(sql, args)
