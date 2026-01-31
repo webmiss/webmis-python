@@ -53,8 +53,8 @@ class Model(Base):
     return None
 
   # 获取-SQL
-  def GetSql(self) -> tuple[str, tuple]:
-    return self.__sql, self.__args
+  def GetSql(self) -> str :
+    return self.__sql
   
   # 获取-自增ID
   def GetID(self) -> int:
@@ -95,7 +95,7 @@ class Model(Base):
   # 条件
   def Where(self, where: str, *args) -> None:
     self.__where = ' WHERE '+where
-    self.__args = args
+    self.__args += args
 
   # 分组
   def Group(self, *group: str) -> None:
@@ -156,6 +156,7 @@ class Model(Base):
     # SQL
     if sql == '':
       sql, args = self.SelectSQL()
+      if sql == '' : return None
     # 执行
     res = []
     cs = self.Exec(self.conn, sql, args)
@@ -176,6 +177,7 @@ class Model(Base):
     if sql == '':
       self.Limit(0, 1)
       sql, args = self.SelectSQL()
+      if sql == '' : return None
     # 执行
     res = {}
     cs = self.Exec(self.conn, sql, args)
@@ -236,10 +238,14 @@ class Model(Base):
     return self.__sql, args
   
   # 添加-执行
-  def Insert(self, sql: str = '', args: tuple=None) :
+  def Insert(self, sql: str = '', args: tuple=None) -> int :
     if sql == '':
       sql, args = self.InsertSQL()
-    self.Print(sql, args)
+    cs = self.Exec(self.conn, sql, args)
+    if cs is None : return 0
+    self.__id = cs.lastrowid
+    cs.close()
+    return self.__id
 
   # 更新-数据
   def Set(self, data: dict) :
@@ -275,12 +281,14 @@ class Model(Base):
     # 结果
     return self.__sql, args
 
-
   # 更新-执行
-  def Update(self, sql: str = '', args: tuple=None) :
+  def Update(self, sql: str = '', args: tuple=None) -> bool :
     if sql == '':
       sql, args = self.UpdateSQL()
-    self.Print(sql, args)
+    cs = self.Exec(self.conn, sql, args)
+    if cs is None : return False
+    cs.close()
+    return True
 
   # 删除-SQL
   def DeleteSQL(self) -> tuple[str, tuple]:
@@ -303,7 +311,10 @@ class Model(Base):
     return self.__sql, args
 
   # 删除-执行
-  def Delete(self, sql: str = '', args: tuple=None) :
+  def Delete(self, sql: str = '', args: tuple=None) -> bool :
     if sql == '':
       sql, args = self.DeleteSQL()
-    self.Print(sql, args)
+    cs = self.Exec(self.conn, sql, args)
+    if cs is None : return False
+    cs.close()
+    return True

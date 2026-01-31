@@ -7,11 +7,11 @@ class Index(Controller):
 
   # 首页
   def Index(self):
+    # 查询
     m = User()
-    m.Values({'uname':'admin1', 'upwd':'123456'})
-    data = m.Insert()
-    # m.Columns('id', 'uname')
-    # m.Where('uname=%s', 'admin1')
-    # data = m.Find()
-    self.Print(data, m.GetNums())
+    m.Columns('id', 'uname')
+    data = m.Find()
+    sql = m.GetSql()
+    self.Print(data, sql, m.GetNums())
+    # 返回
     return self.GetJSON({'code':0, 'msg':'Python Api'})
