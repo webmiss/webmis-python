@@ -2,10 +2,12 @@ import pymysql
 from pymysql import Error
 from core.Base import Base
 from app.config.Db import Db
+from core.MySQLConnectionPool import MySQLConnectionPool
 
 # 模型
 class Model(Base):
 
+  pool: object = None   # 连接池
   conn: object = None   # 连接
   __name: str = 'Model' # 名称
   __table: str = ''     # 数据表
@@ -25,17 +27,15 @@ class Model(Base):
 
   # 获取连接
   def DBConn(self, name: str = "default") -> object :
+    # 配置
     cfg = Db().Config(name)
+    # 连接池
+    if Model.pool is None:
+      Model.pool = MySQLConnectionPool(cfg)
+    # 创建连接
     if self.conn is None:
       try:
-        self.conn = pymysql.connect(
-          host=cfg['host'],
-          port=cfg['port'],
-          user=cfg['user'],
-          password=cfg['password'],
-          database=cfg['database'],
-          charset=cfg['charset']
-        )
+        self.conn = Model.pool.getConnection(cfg['poolMaxWait'])
       except Error as e:
         self.Print('[ '+self.__name+' ] Conn:', e)
     return self.conn
@@ -51,6 +51,11 @@ class Model(Base):
       except Error as e:
         self.Print('[ '+self.__name+' ] Execute:', e)
     return None
+
+  # 关闭
+  def Close(self) -> None:
+    if Model.pool is not None:
+      Model.pool.releaseConnection(self.conn)
 
   # 获取-SQL
   def GetSql(self) -> str :
@@ -163,6 +168,7 @@ class Model(Base):
     if cs is None : return None
     data = cs.fetchall()
     cs.close()
+    self.Close()
     # 结果
     for d in data :
       row = {}
@@ -184,6 +190,7 @@ class Model(Base):
     if cs is None : return None
     data = cs.fetchone()
     cs.close()
+    self.Close()
     # 结果
     if data is None : return None
     for i,v in enumerate(data) :
@@ -245,6 +252,7 @@ class Model(Base):
     if cs is None : return 0
     self.__id = cs.lastrowid
     cs.close()
+    self.Close()
     return self.__id
 
   # 更新-数据
@@ -288,6 +296,7 @@ class Model(Base):
     cs = self.Exec(self.conn, sql, args)
     if cs is None : return False
     cs.close()
+    self.Close()
     return True
 
   # 删除-SQL
@@ -317,4 +326,5 @@ class Model(Base):
     cs = self.Exec(self.conn, sql, args)
     if cs is None : return False
     cs.close()
+    self.Close()
     return True
