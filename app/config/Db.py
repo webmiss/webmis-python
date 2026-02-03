@@ -14,8 +14,8 @@ class Db:
         data['database'] = 'webmis'                               # 数据库
         data['charset'] = 'utf8mb4'                               # 编码
         data['autocommit'] = True                                 # 自动提交事务
-        data['poolInitSize'] = 100                                # 连接池初始数量
-        data['poolMaxSize'] = 150                                 # 连接池最大数量
+        data['poolInitSize'] = 10                                 # 连接池初始数量
+        data['poolMaxSize'] = 15                                  # 连接池最大数量
         data['poolMaxWait'] = 3.0                                 # 获取连接等待时间( 秒 )
       case "other":
         data['host'] = 'localhost'                                # 主机

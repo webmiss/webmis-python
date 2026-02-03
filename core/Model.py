@@ -1,4 +1,3 @@
-import pymysql
 from pymysql import Error
 from core.Base import Base
 from app.config.Db import Db

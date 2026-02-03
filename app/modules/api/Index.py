@@ -1,4 +1,5 @@
 from core.Controller import Controller
+from core.Redis import Redis
 
 from app.models.User import User
 
@@ -11,7 +12,9 @@ class Index(Controller):
     m = User()
     m.Columns('id', 'uname')
     data = m.Find()
-    sql = m.GetSql()
-    self.Print(data, sql, m.GetNums())
+    # Redis
+    r = Redis()
+    r.Set('test', 'Python Redis')
+    self.Print(data, r.Get('test'))
     # 返回
     return self.GetJSON({'code':0, 'msg':'Python Api'})
