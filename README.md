@@ -3,17 +3,70 @@
 
 ## 安装
 ```bash
+# 下载
 $ git clone https://github.com/webmiss/webmis-python.git
 $ cd webmis-python
-$ ./bash install
+# Linux、MacOS
+./bash install
+# Windows
+.\cmd install
 ```
 
-## 运行
+## 开发环境
 ```bash
 # Linux、MacOS
 ./bash serve
 # Windows
 .\cmd serve
+```
+
+## 生产环境
+*** Ubuntu ***
+```bash
+# Nginx
+apt install nginx -y
+apt autoremove -y
+# MariaDB
+apt install mariadb-server -y
+# Redis
+apt install redis-server -y
+# Python3
+apt install python3-pymysql python3-redis python3-jwt -y
+```
+
+*** Nginx ***
+```bash
+upstream python {
+    server localhost:9010;
+}
+map $http_upgrade $connection_upgrade {
+    default upgrade;
+    '' close;
+}
+server {
+    server_name  python.webmis.vip;
+    set $root_path /home/www/webmis/python/public;
+    root $root_path;
+    index index.html;
+
+    location / {
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_pass http://python;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection $connection_upgrade;
+    }
+    location ~* ^/(upload|favicon.png)/(.+)$ {
+        root $root_path;
+        add_header 'Access-Control-Allow-Origin' '*';
+        add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS';
+        add_header 'Access-Control-Allow-Headers' 'Content-Type, Authorization';
+        if ($request_method = 'OPTIONS') { return 204; }
+    }
+
+}
 ```
 
 ## 项目结构
