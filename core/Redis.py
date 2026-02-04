@@ -116,3 +116,30 @@ class Redis(Base):
   def HLen(self, key: str) -> int:
     if self.conn is None: return None
     return self.conn.hlen(key)
+
+  # 列表(List)-添加
+  def LPush(self, key: str, value: str) -> bool:
+    if self.conn is None: return None
+    self.conn.lpush(key, value)
+    return True
+  def RPush(self, key: str, value: str) -> bool:
+    if self.conn is None: return None
+    self.conn.rpush(key, value)
+    return True
+  
+  # 列表(List)-获取
+  def LRange(self, key: str, start: int, end: int) -> list:
+    if self.conn is None: return None
+    return self.conn.lrange(key, start, end)
+  def LPop(self, key: str) -> str:
+    if self.conn is None: return None
+    return self.conn.lpop(key)
+  def RPop(self, key: str) -> str:
+    if self.conn is None: return None
+    return self.conn.rpop(key)
+  def BLPop(self, key: str, timeout: int = 0) -> tuple:
+    if self.conn is None: return None
+    return self.conn.blpop(key, timeout)
+  def BRPop(self, key: str, timeout: int = 0) -> tuple:
+    if self.conn is None: return None
+    return self.conn.brpop(key, timeout)
