@@ -21,7 +21,7 @@ $ cd webmis-python
 ```
 
 ## 生产环境
-*** Ubuntu ***
+### Ubuntu
 ```bash
 # Nginx
 apt install nginx -y
@@ -34,7 +34,7 @@ apt install redis-server -y
 apt install python3-pymysql python3-redis python3-jwt -y
 ```
 
-*** Nginx ***
+### Nginx
 ```bash
 upstream python {
     server localhost:9010;
