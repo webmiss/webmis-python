@@ -11,7 +11,7 @@ package="watchdog pymysql redis pyjwt"
 
 # 运行
 if [ "$s" == "serve" ]; then
-  python $index
+  python3 $index
 # 安装
 elif [ "$s" == "install" ]; then
   {
@@ -30,13 +30,13 @@ elif [ "$s" == "stop" ]; then
 # Socket-运行
 elif [ "$s" == "socket" ]; then
   {
-    python $cli socket start
+    python3 $cli socket start
   } || {
     echo "> 请安装'python'"
   }
 # Socket-启动
 elif [ "$s" == "socketStart" ]; then
-  python $cli socket start &
+  python3 $cli socket start &
 # Socket-停止
 elif [ "$s" == "socketStop" ]; then
   ps -aux | grep "$cli socket start" | grep -v grep | awk {'print $2'} | xargs kill
