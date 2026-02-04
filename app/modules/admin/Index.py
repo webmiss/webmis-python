@@ -1,7 +1,7 @@
 from core.Controller import Controller
 
 # 控制台
-class index(Controller):
+class Index(Controller):
 
   # 首页
   def Index(self):
