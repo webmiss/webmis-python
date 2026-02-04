@@ -26,7 +26,7 @@ elif [ "$s" == "start" ]; then
   python3 $app > $log 2>&1 &
 # 停止
 elif [ "$s" == "stop" ]; then
-  ps -aux | grep python3 | grep -v grep | awk {'print $2'} | xargs kill
+  ps -aux | grep "python3 $app" | grep -v grep | awk {'print $2'} | xargs kill
 # Socket-运行
 elif [ "$s" == "socket" ]; then
   {
@@ -48,7 +48,7 @@ else
   echo "  serve         运行"
   echo "  install       安装依赖包: $package"
   echo "<Server>"
-  echo "  start         启动: uwsgi --ini $config &"
+  echo "  start         启动: python3 $app &"
   echo "  stop          停止"
   echo "<Socket>"
   echo "  socket        运行"
