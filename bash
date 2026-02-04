@@ -6,7 +6,7 @@ index="run_dev.py"
 config="uwsgi/uwsgi.ini"
 pid="uwsgi/uwsgi.pid"
 cli="cli.py"
-package="watchdog pymysql redis"
+package="watchdog pymysql redis pyjwt"
 # package="python-dateutil flask flask_cors PyJWT redis wheel DBUtils pymysql websockets websocket-client qrcode Image zxing oss2"
 
 # 运行
