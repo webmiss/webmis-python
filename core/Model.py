@@ -156,7 +156,7 @@ class Model(Base):
     return self.__sql, args
   
   # 查询-多条
-  def Find(self, sql: str = '', args: tuple=None) :
+  def Find(self, sql: str = '', *args) :
     # SQL
     if sql == '':
       sql, args = self.SelectSQL()
@@ -177,7 +177,7 @@ class Model(Base):
     return res
 
   # 查询-单条
-  def FindFirst(self, sql: str = '', args: tuple=None) -> any :
+  def FindFirst(self, sql: str = '', *args) -> any :
     # SQL
     if sql == '':
       self.Limit(0, 1)
@@ -244,7 +244,7 @@ class Model(Base):
     return self.__sql, args
   
   # 添加-执行
-  def Insert(self, sql: str = '', args: tuple=None) -> int :
+  def Insert(self, sql: str = '', *args) -> int :
     if sql == '':
       sql, args = self.InsertSQL()
     cs = self.Exec(self.conn, sql, args)
@@ -289,7 +289,7 @@ class Model(Base):
     return self.__sql, args
 
   # 更新-执行
-  def Update(self, sql: str = '', args: tuple=None) -> bool :
+  def Update(self, sql: str = '', *args) -> bool :
     if sql == '':
       sql, args = self.UpdateSQL()
     cs = self.Exec(self.conn, sql, args)
@@ -319,7 +319,7 @@ class Model(Base):
     return self.__sql, args
 
   # 删除-执行
-  def Delete(self, sql: str = '', args: tuple=None) -> bool :
+  def Delete(self, sql: str = '', *args) -> bool :
     if sql == '':
       sql, args = self.DeleteSQL()
     cs = self.Exec(self.conn, sql, args)
