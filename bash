@@ -5,7 +5,7 @@ s=$1
 app="run.py"
 cli="cli.py"
 dev="run_dev.py"
-log='public/server.log'
+log='/dev/null'
 package="watchdog pymysql redis pyjwt"
 # package="python-dateutil flask flask_cors PyJWT redis wheel DBUtils pymysql websockets websocket-client qrcode Image zxing oss2"
 
@@ -23,7 +23,7 @@ elif [ "$s" == "install" ]; then
   }
 # 启动
 elif [ "$s" == "start" ]; then
-  python3 $app > $log 2>&1 &
+  nohup python3 $app > $log 2>&1 &
 # 停止
 elif [ "$s" == "stop" ]; then
   ps -aux | grep "python3 $app" | grep -v grep | awk {'print $2'} | xargs kill
