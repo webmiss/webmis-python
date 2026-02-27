@@ -6,8 +6,10 @@
 # 下载
 $ git clone https://github.com/webmiss/webmis-python.git
 $ cd webmis-python
+
 # Linux、MacOS
 ./bash install
+
 # Windows 11
 .\cmd install
 ```
@@ -16,7 +18,8 @@ $ cd webmis-python
 ```bash
 # Linux、MacOS
 ./bash serve
-# Windows
+
+# Windows 11
 .\cmd serve
 ```
 
