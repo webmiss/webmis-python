@@ -8,6 +8,10 @@ set cli=cli.py
 set python_url=https://www.python.org/ftp/python/3.14.3/python-3.14.3-amd64.exe
 set package=watchdog pymysql redis pyjwt
 
+@REM 临时环境变量
+for /f "tokens=2*" %%a in ('reg query "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment" /v Path') do set "SysPath=%%b"
+for /f "tokens=2*" %%a in ('reg query "HKCU\Environment" /v Path 2^>nul') do set "UserPath=%%b"
+set "PATH=%SysPath%;%UserPath%"
 @REM Python环境
 python --version >nul 2>&1
 if %errorLevel% neq 0 (
