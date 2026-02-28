@@ -15,17 +15,19 @@ if %errorLevel% neq 0 (
   echo [✓] 下载文件: %python_url%
   curl -L "%python_url%" -o python.exe
   @REM 安装
+  echo [✓] 正在安装: python.exe
   python.exe /quiet InstallAllUsers=1 PrependPath=1 Include_test=0
   @REM 清除文件
   del python.exe >nul 2>&1
-  echo [✓] 安装成功: 正在刷新环境变量或重启终端
-  @REM 查看版本
+  echo [✓] 安装成功: 正在刷新环境变量
+  @REM 验证
   python --version >nul 2>&1
   if %errorLevel% neq 0 (
-    @REM 环境变量
+    @REM 临时环境变量
     for /f "tokens=2*" %%a in ('reg query "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment" /v Path') do set "SysPath=%%b"
     for /f "tokens=2*" %%a in ('reg query "HKCU\Environment" /v Path 2^>nul') do set "UserPath=%%b"
     set "PATH=%SysPath%;%UserPath%"
+    @REM 查看版本
     python --version
     pip --version
   )
@@ -37,6 +39,7 @@ REM 运行
 REM 安装
 ) else if "%s%"=="install" (
   pip install %package%
+  echo [✓] 运行: .\cmd serve
 REM Socket-运行
 ) else if "%s%"=="socket" (
   ( python %cli% socket start ) || ( echo ^> 请安装'python' )
