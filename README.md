@@ -1,6 +1,12 @@
 # webmis-python
 采用Python + Redis + MariaDB开发的轻量级HMVC基础框架，目录结构清晰，支持CLI方式访问资料方便执行定时脚本。包括HMVC模块化管理、自动路由、CLI命令行、Socket通信、redis缓存、Token机制等功能，提供支付宝、微信、文件上传、图像处理、二维码等常用类。
 
+**演示**
+- 使用文档( [https://webmis.vip/](https://webmis.vip/python/install/index) )
+- 网站-API( [https://python.webmis.vip/](https://python.webmis.vip/) )
+- 前端-API( [https://python.webmis.vip/api](https://python.webmis.vip/api) )
+- 后台-API( [https://python.webmis.vip/admin](https://python.webmis.vip/admin) )
+
 ## 安装
 ```bash
 # 下载
@@ -26,25 +32,21 @@ $ cd webmis-python
 ## 生产环境
 ### Ubuntu
 ```bash
-# Nginx
-apt install nginx -y
-apt autoremove -y
-# MariaDB
-apt install mariadb-server -y
-# Redis
-apt install redis-server -y
-# Python3
+# Nginx、MariaDB、Redis
+apt install -y nginx mariadb-server redis-server
+# Python3( 依赖包 )
 apt install python3-pymysql python3-redis python3-jwt -y
+# 运行
+./bash start
+# 停止
+./bash stop
 ```
 
 ### Nginx
 ```bash
 upstream python {
     server localhost:9010;
-}
-map $http_upgrade $connection_upgrade {
-    default upgrade;
-    '' close;
+    keepalive 1000;
 }
 server {
     server_name  python.webmis.vip;
@@ -53,13 +55,17 @@ server {
     index index.html;
 
     location / {
+        proxy_pass http://python;
+        proxy_http_version 1.1;
+        proxy_set_header Connection "";
+        # 请求头
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_pass http://python;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection $connection_upgrade;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        # 代理超时配置
+        proxy_connect_timeout 5s;
+        proxy_read_timeout 30s;
     }
     location ~* ^/(upload|favicon.png)/(.+)$ {
         root $root_path;

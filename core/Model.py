@@ -98,6 +98,7 @@ class Model(Base):
 
   # 条件
   def Where(self, where: str, *args) -> None:
+    if where == '' : return
     self.__where = ' WHERE '+where
     self.__args += args
 
