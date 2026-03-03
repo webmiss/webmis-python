@@ -9,6 +9,17 @@ log='public/server.log'         # 运行日志
 package="watchdog pymysql redis pyjwt"
 # package="python-dateutil flask flask_cors PyJWT redis wheel DBUtils pymysql websockets websocket-client qrcode Image zxing oss2"
 
+# Python环境
+if ! command -v python3 &> /dev/null; then
+  echo "> 请安装'python3'"
+  exit
+fi
+# Pip环境
+if ! command -v pip &> /dev/null; then
+  echo "> 请安装'pip'"
+  exit
+fi
+
 # 运行
 if [ "$s" == "serve" ]; then
   python3 $dev
@@ -18,9 +29,8 @@ elif [ "$s" == "install" ]; then
     sudo pip install $package
   } || {
     pip install $package
-  } || {
-    echo "> 请安装'pip'"
   }
+  echo "运行: ./bash serve"
 # 启动
 elif [ "$s" == "start" ]; then
   nohup python3 $app > $log 2>&1 &
