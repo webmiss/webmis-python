@@ -249,7 +249,7 @@ class Model(Base):
     if sql == '':
       sql, args = self.InsertSQL()
     cs = self.Exec(self.conn, sql, args)
-    if cs is None : return 0
+    if cs is None : return -1
     self.__id = cs.lastrowid
     cs.close()
     self.Close()
