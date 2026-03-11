@@ -9,7 +9,14 @@ class Controller(Base):
 
   # 返回JSON
   def GetJSON(self, data: str|dict='', status: int=200, header: list=[('Content-Type', 'application/json; charset=utf-8')]) -> tuple :
-    return json.dumps(data).encode('utf-8'), status, header
+    # 允许跨域请求
+    header_cors = [
+      ('Access-Control-Allow-Origin', '*'),
+      ('Access-Control-Allow-Methods', 'GET, PUT, POST, DELETE, OPTIONS'),
+    ]
+    # 合并头部
+    header_cors.extend(header)
+    return json.dumps(data).encode('utf-8'), status, header_cors
   
   # Get参数
   def Get(self, name: str):

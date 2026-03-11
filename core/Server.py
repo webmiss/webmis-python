@@ -31,6 +31,15 @@ class WSGIApplication(Controller):
     Controller.post_raw = post_params
    
     try:
+      # OPTIONS
+      if environ.get('REQUEST_METHOD') == 'OPTIONS':
+        start_response('200 OK', [
+          ('Access-Control-Allow-Origin', '*'),
+          ('Access-Control-Allow-Methods', 'GET, PUT, POST, DELETE, OPTIONS'),
+          ('Access-Control-Allow-Headers', 'Content-Type, Authorization'),
+          ('Access-Control-Max-Age', '2592000')
+        ])
+        return []
       # 动态控制器类
       module_name = f"app.modules.{module_name.lower()}.{controller_name}"
       controller_module = importlib.import_module(module_name)
@@ -42,6 +51,11 @@ class WSGIApplication(Controller):
       # 构建响应
       status = f"{status_code} OK" if status_code == 200 else f"{status_code} Error"
       start_response(status, header)
+      # start_response('200 OK', [
+      #   ('Access-Control-Allow-Origin', '*'),
+      #   ('Access-Control-Allow-Methods', 'GET, PUT, POST, DELETE, OPTIONS'),
+      #   ('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+      # ])
       return [response_body]
     except Exception as e:
       self.Print(f"[ {self.__name} ]", str(e))
