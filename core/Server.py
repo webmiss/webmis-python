@@ -1,4 +1,3 @@
-from core.Base import Base
 from core.Controller import Controller
 from core.Router import Router
 import json, importlib
@@ -11,9 +10,20 @@ class WSGIApplication(Controller):
 
   # 自动执行
   def __call__(self, environ: dict, start_response: callable) -> bytes:
+    # 允许跨域请求
+    header_cors = [
+      ('Access-Control-Allow-Origin', '*'),                                   # 域名
+      ('Access-Control-Allow-Methods', 'GET, PUT, POST, DELETE, OPTIONS'),    # 方法
+      ('Access-Control-Allow-Headers', 'Content-Type, Content-Range, Content-Disposition, Content-Description, Authorization')
+    ]
+    # OPTIONS
+    if environ.get('REQUEST_METHOD') == 'OPTIONS':
+      header_cors.extend([('Access-Control-Max-Age', '2592000')])             # OPTIONS(缓存30天)
+      start_response('200 OK', header_cors)
+      return []
     # 获取请求路径
     path = environ.get('PATH_INFO', '/')
-    if path == '/': path = '/home/index/index'
+    if path == '/': path = '/web/index/index'
     module_name, controller_name, method_name, params = Router().parse_url(path)
     # Get 参数
     Controller.get_raw = urllib.parse.parse_qs(environ.get('QUERY_STRING', ''))
@@ -28,18 +38,10 @@ class WSGIApplication(Controller):
           post_params = urllib.parse.parse_qs(post_raw)
         elif 'application/json' in content_type:
           post_params = json.loads(post_raw) if post_raw else {}
+    # 缓存到控制器
     Controller.post_raw = post_params
    
     try:
-      # OPTIONS
-      if environ.get('REQUEST_METHOD') == 'OPTIONS':
-        start_response('200 OK', [
-          ('Access-Control-Allow-Origin', '*'),
-          ('Access-Control-Allow-Methods', 'GET, PUT, POST, DELETE, OPTIONS'),
-          ('Access-Control-Allow-Headers', 'Content-Type, Authorization'),
-          ('Access-Control-Max-Age', '2592000')
-        ])
-        return []
       # 动态控制器类
       module_name = f"app.modules.{module_name.lower()}.{controller_name}"
       controller_module = importlib.import_module(module_name)
@@ -48,14 +50,10 @@ class WSGIApplication(Controller):
       controller = controller_cls()
       method = getattr(controller, method_name)
       response_body, status_code, header = method(*params)
+      header_cors.extend(header)
       # 构建响应
       status = f"{status_code} OK" if status_code == 200 else f"{status_code} Error"
-      start_response(status, header)
-      # start_response('200 OK', [
-      #   ('Access-Control-Allow-Origin', '*'),
-      #   ('Access-Control-Allow-Methods', 'GET, PUT, POST, DELETE, OPTIONS'),
-      #   ('Access-Control-Allow-Headers', 'Content-Type, Authorization')
-      # ])
+      start_response(status, header_cors)
       return [response_body]
     except Exception as e:
       self.Print(f"[ {self.__name} ]", str(e))

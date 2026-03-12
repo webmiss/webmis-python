@@ -8,15 +8,15 @@ class Controller(Base):
   post_raw: dict = {}   # Post参数
 
   # 返回JSON
-  def GetJSON(self, data: str|dict='', status: int=200, header: list=[('Content-Type', 'application/json; charset=utf-8')]) -> tuple :
-    # 允许跨域请求
-    header_cors = [
-      ('Access-Control-Allow-Origin', '*'),
-      ('Access-Control-Allow-Methods', 'GET, PUT, POST, DELETE, OPTIONS'),
+  def GetJSON(self, data: str|dict='', status: int=200, header: list=[]) -> tuple :
+    # Json类型
+    headers = [
+      ('Content-Type', 'application/json; charset=utf-8')
     ]
     # 合并头部
-    header_cors.extend(header)
-    return json.dumps(data).encode('utf-8'), status, header_cors
+    headers.extend(header)
+    # 返回
+    return json.dumps(data).encode('utf-8'), status, headers
   
   # Get参数
   def Get(self, name: str):
