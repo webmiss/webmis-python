@@ -8,4 +8,4 @@ class Index(Controller):
   # 首页
   def Index(self):
     context: dict = {"title": Env.title, "copy": Env.copy}
-    return View().render('home/index', context)
+    return View().render('web/index', context)

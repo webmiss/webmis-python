@@ -2,7 +2,7 @@
 class Router:
 
   __name: str = 'app'           # 名称
-  __module: str = 'home'        # 模块
+  __module: str = 'web'         # 模块
   __controller: str = 'Index'   # 控制器
   __method: str = 'Index'       # 方法
   __params: list = []           # 参数

@@ -87,7 +87,7 @@ webmis-python/
 │    └── modules                  // 模块
 │    │    ├── admin              // 后台
 │    │    ├── api                // 应用
-│    │    └── home               // 网站
+│    │    └── web               // 网站
 │    ├── task                     // 任务类
 │    └── views                    // 视图文件
 ├── core
