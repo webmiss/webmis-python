@@ -21,6 +21,7 @@ class Controller(Base):
     controller_cls = getattr(controller_module, lang)
     # 实例化
     controller = controller_cls()
+    if hasattr(controller, action)==False: return ''
     method = getattr(controller, action)
     if argv: return method%(argv)
     else: return method
