@@ -39,6 +39,7 @@ class WSGIApplication(Controller):
         elif 'application/json' in content_type:
           post_params = json.loads(post_raw) if post_raw else {}
     # 缓存到控制器
+    Controller.environ = environ
     Controller.post_raw = post_params
    
     try:

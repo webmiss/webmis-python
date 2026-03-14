@@ -1,11 +1,19 @@
 import json, importlib, importlib.util
+import urllib.parse
 from core.Base import Base
 
 # 控制器
 class Controller(Base):
 
+  environ: dict = {}    # 环境变量
   get_raw: dict = {}    # Get参数
   post_raw: dict = {}   # Post参数
+
+  # 资源地址
+  def BaseUrl(self, url: str) -> str:
+    http = 'http'
+    if self.environ['wsgi.url_scheme']=='https': http='https'
+    return http+"://"+self.environ['HTTP_HOST']+"/"+url
 
   # 获取语言
   def GetLang(self, action: str, *argv) -> str:
@@ -52,4 +60,3 @@ class Controller(Base):
     return self.post_raw
   def JsonName(self, param: dict, name: str):
     return param[name] if name in param else None
-  
