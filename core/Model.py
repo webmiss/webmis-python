@@ -9,6 +9,7 @@ class Model(Base):
   pool: object = None   # 连接池
   conn: object = None   # 连接
   __name: str = 'Model' # 名称
+  __db: str = 'default' # 数据库
   __table: str = ''     # 数据表
   __columns: str = '*'  # 字段
   __where: str = ''     # 条件
@@ -26,6 +27,8 @@ class Model(Base):
 
   # 获取连接
   def DBConn(self, name: str = "default") -> object :
+    # 默认值
+    self.__db = name
     # 配置
     cfg = Db().Config(name)
     # 连接池
@@ -162,6 +165,8 @@ class Model(Base):
     if sql == '':
       sql, args = self.SelectSQL()
       if sql == '' : return None
+    # 连接
+    if self.conn is None : self.DBConn(self.__db)
     # 执行
     res = []
     cs = self.Exec(self.conn, sql, args)
@@ -184,6 +189,8 @@ class Model(Base):
       self.Limit(0, 1)
       sql, args = self.SelectSQL()
       if sql == '' : return None
+    # 连接
+    if self.conn is None : self.DBConn(self.__db)
     # 执行
     res = {}
     cs = self.Exec(self.conn, sql, args)
@@ -246,8 +253,12 @@ class Model(Base):
   
   # 添加-执行
   def Insert(self, sql: str = '', *args) -> int :
+    # SQL
     if sql == '':
       sql, args = self.InsertSQL()
+    # 连接
+    if self.conn is None : self.DBConn(self.__db)
+    # 执行
     cs = self.Exec(self.conn, sql, args)
     if cs is None : return -1
     self.__id = cs.lastrowid
@@ -291,8 +302,12 @@ class Model(Base):
 
   # 更新-执行
   def Update(self, sql: str = '', *args) -> bool :
+    # SQL
     if sql == '':
       sql, args = self.UpdateSQL()
+    # 连接
+    if self.conn is None : self.DBConn(self.__db)
+    # 执行
     cs = self.Exec(self.conn, sql, args)
     if cs is None : return False
     cs.close()
@@ -321,8 +336,12 @@ class Model(Base):
 
   # 删除-执行
   def Delete(self, sql: str = '', *args) -> bool :
+    # SQL
     if sql == '':
       sql, args = self.DeleteSQL()
+    # 连接
+    if self.conn is None : self.DBConn(self.__db)
+    # 执行
     cs = self.Exec(self.conn, sql, args)
     if cs is None : return False
     cs.close()
