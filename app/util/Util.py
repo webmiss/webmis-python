@@ -4,22 +4,22 @@
 class Util:
 
   # Trim
-  def trim(str: str):
+  def Trim(str: str):
     return str.strip()
   
   # Ltrim
-  def ltrim(str: str):
+  def Ltrim(str: str):
     return str.lstrip()
   
   # Rtrim
-  def rtrim(str: str):
+  def Rtrim(str: str):
     return str.rstrip()
   
   # Lower
-  def lower(str: str):
+  def Lower(str: str):
     return str.lower()
   
   # Upper
-  def upper(str: str):
+  def Upper(str: str):
     return str.upper()
  

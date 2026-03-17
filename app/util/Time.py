@@ -4,5 +4,5 @@ import time
 class Time:
 
   # Time
-  def time() -> int:
+  def Time() -> int:
     return int(time.time())
