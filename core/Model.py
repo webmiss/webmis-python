@@ -26,9 +26,9 @@ class Model(Base):
   __nums: int = 0       # 影响行数
 
   # 获取连接
-  def DBConn(self, name: str = "default") -> object :
+  def DBConn(self, name: str='') -> object :
     # 默认值
-    self.__db = name
+    self.__db = 'default' if name=='' else name
     # 配置
     cfg = Db().Config(name)
     # 连接池

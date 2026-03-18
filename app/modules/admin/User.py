@@ -1,10 +1,11 @@
 from core.Controller import Controller
 from core.Redis import Redis
 from app.config.Env import Env
+from app.service.TokenAdmin import TokenAdmin
+from app.librarys.Safety import Safety
 from app.util.Util import Util
 from app.util.Time import Time
 from app.util.Hash import Hash
-from app.librarys.Safety import Safety
 
 from app.models.User import User as UserM
 
@@ -80,6 +81,7 @@ class User(Controller):
     perm: str = data['role_perm']
     if data['perm'] : perm = data['perm']
     if not perm : return self.GetJSON({'code':4000, 'msg':self.GetLang('login_verify_perm')})
+    TokenAdmin().SavePerm(str(data['id']), perm)
     self.Print(data, perm)
     # 返回
     return self.GetJSON({'code':0, 'data':{}})
