@@ -12,13 +12,13 @@ from app.models.SysMenu import SysMenu
 class TokenAdmin(Base):
     
   # 验证
-  def Verify(self, token: str, urlPerm) -> str:
+  def Verify(self, token: str, urlPerm: str) -> str:
     # Token
     if token == '' : return 'Token不能为空!'
     tData = Safety.Decode(token)
     if tData == None : return 'Token验证失败!'
     # 是否过期
-    uid = tData['uid']
+    uid = str(tData['uid'])
     key = Env.admin_token_prefix+'_token_'+uid
     redis = Redis()
     time = redis.Ttl(key)
@@ -43,13 +43,18 @@ class TokenAdmin(Base):
     data = m.FindFirst()
     if data == None : return '菜单验证无效!'
     # 验证菜单
-    id: str = data['id']
+    id: str = str(data['id'])
     perm: dict = self.GetPerm(token)
     if not perm[id] : return '无权访问菜单!'
     # 验证动作
     permVal: int = 0
     actionVal: int = int(perm[id])
-    permArr = data['action'] 
+    permArr = Util.JsonDecode(str(data['action']))
+    for v in permArr :
+      if action==v['action'] :
+        permVal = int(v['perm'])
+        break
+    if (actionVal&permVal)==0 : return '无权访问动作!'
     return ''
   
   # 权限-保存
@@ -74,8 +79,8 @@ class TokenAdmin(Base):
     if not permStr : return arr
     # 拆分
     perm = Util.Explode(permStr, ' ')
-    for i in perm:
-      tmp = Util.Explode(i, ':')
+    for v in perm:
+      tmp = Util.Explode(v, ':')
       arr[tmp[0]] = tmp[1] 
     return arr
   
@@ -93,9 +98,9 @@ class TokenAdmin(Base):
   
   # 解析
   def Token(self, token: str) -> dict|None:
-    tData = Safety.Decode(token)
-    if tData == None : return None
+    data = Safety.Decode(token)
+    if data == None : return None
     # 过期时间
     redis = Redis()
-    tData['time'] = redis.Ttl(Env.admin_token_prefix+'_token_'+str(tData['uid']))
-    return tData
+    data['time'] = redis.Ttl(Env.admin_token_prefix+'_token_'+str(data['uid']))
+    return data

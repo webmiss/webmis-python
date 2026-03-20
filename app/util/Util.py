@@ -40,9 +40,9 @@ class Util:
       return ''
 
   # JsonDecode
-  def JsonDecode(json: str) -> dict:
+  def JsonDecode(jsonStr: str) -> dict:
     try:
-      return json.loads(json)
+      return json.loads(jsonStr)
     except Exception as e:
       print(e)
       return {}

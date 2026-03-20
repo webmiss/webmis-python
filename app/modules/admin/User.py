@@ -2,6 +2,7 @@ from core.Controller import Controller
 from core.Redis import Redis
 from app.config.Env import Env
 from app.service.TokenAdmin import TokenAdmin
+from app.service.Data import Data
 from app.librarys.Safety import Safety
 from app.util.Util import Util
 from app.util.Time import Time
@@ -82,6 +83,68 @@ class User(Controller):
     if data['perm'] : perm = data['perm']
     if not perm : return self.GetJSON({'code':4000, 'msg':self.GetLang('login_verify_perm')})
     TokenAdmin().SavePerm(str(data['id']), perm)
-    self.Print(data, perm)
+    # 登录时间
+    ltime: int = Time.Time()
+    m = UserM()
+    m.Set({'ltime': ltime})
+    m.Where('id=%s', data['id'])
+    m.Update()
+    # Token
+    token = TokenAdmin().Create({
+      'uid': data['id'],
+      'uname': uname,
+      'name': data['name'],
+      'type': data['type'],
+      'isPasswd': isPasswd,
+      'brand': data['brand'],
+      'shop': data['shop'],
+      'partner': data['partner'],
+      'partner_in': data['partner_in']
+    })
+    # 用户信息
+    uinfo = {
+      'uid': data['id'],
+      'uname': uname,
+      'tel': data['tel'],
+      'email': data['email'],
+      'ltime': Time.Date('%Y-%m-%d %H:%M:%S', ltime),
+      'type': data['type'],
+      'nickname': data['nickname'],
+      'department': data['department'],
+      'position': data['position'],
+      'name': data['name'],
+      'gender': data['gender'],
+      'birthday': data['birthday'],
+      'img': Data().Img(str(data['img'])),
+      'signature': data['signature'],
+    }
     # 返回
-    return self.GetJSON({'code':0, 'data':{}})
+    return self.GetJSON({'code':0, 'data':{'token':token, 'uinfo':uinfo, 'isPasswd':isPasswd}})
+  
+  # Token验证
+  def Token(self):
+    # 参数
+    json = self.Json()
+    token = self.JsonName(json, 'token')
+    is_uinfo = self.JsonName(json, 'uinfo')
+    # 验证
+    msg = TokenAdmin().Verify(token, '')
+    if msg != '' : return self.GetJSON({'code':4001})
+    tData = TokenAdmin().Token(token)
+    # 用户信息
+    uinfo: dict = {}
+    if is_uinfo :
+      m = UserM()
+      m.Table('user as a')
+      m.LeftJoin('user_info as b', 'a.id=b.uid')
+      m.Columns(
+        'FROM_UNIXTIME(a.ltime) as ltime', 'a.tel', 'a.email',
+        'b.type', 'b.nickname', 'b.department', 'b.position', 'b.name', 'b.gender', 'b.img', 'b.signature', 'FROM_UNIXTIME(b.birthday, "%%Y-%%m-%%d") as birthday'
+      )
+      m.Where('a.id=%s', tData['uid'])
+      uinfo = m.FindFirst()
+      uinfo['uid'] = str(tData['uid'])
+      uinfo['uname'] = tData['uname']
+      uinfo['img'] = Data().Img(str(uinfo['img']))
+    # 返回
+    return self.GetJSON({'code':0, 'data':{'token_time':int(tData['time']), 'uinfo':uinfo, 'isPasswd':tData['isPasswd']}})
