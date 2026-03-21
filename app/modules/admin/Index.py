@@ -1,7 +1,12 @@
 from core.Controller import Controller
+from app.service.TokenAdmin import TokenAdmin
+
+from app.models.ErpBasePartner import ErpBasePartner
 
 # 控制台
 class Index(Controller):
+
+  __partner: dict = {}     # 主仓
 
   # 首页
   def Index(self):
@@ -65,3 +70,21 @@ class Index(Controller):
     }
     # 返回
     return self.GetJSON({'code':0, 'data': holiday[date] if date in holiday else '' })
+  
+  # 选项
+  def GetSelect(self):
+    # 参数
+    json = self.Json()
+    token: str = self.JsonName(json, 'token')
+    # 验证
+    msg = TokenAdmin().Verify(token, '')
+    if msg != '' : return self.GetJSON({'code':4001})
+    # 仓库
+    self.__partner = ErpBasePartner().GetList(['type=0', 'status=1'])
+    partner_name = []
+    for k,v in self.__partner.items():
+      partner_name.append({'label': v['name'], 'value': k})
+    # 返回
+    return self.GetJSON({'code':0, 'data':{
+      'partner': partner_name
+    }})

@@ -32,10 +32,10 @@ class TokenAdmin(Base):
       redis.Expire(Env.admin_token_prefix+'_perm_'+uid, Env.admin_token_time)
     # URL权限
     if urlPerm == '' : return ''
-    arr = Util.Explode(urlPerm, '/')
-    action = Util.Explode(arr[-1], '?')[0]
+    arr = Util.Explode('/', urlPerm)
+    action = Util.Explode('?', arr[-1])[0]
     arr.pop()
-    controller = Util.Implode(arr, '/')
+    controller = Util.Implode('/', arr)
     # 查询菜单
     m = SysMenu()
     m.Columns('id', 'action')
@@ -78,9 +78,9 @@ class TokenAdmin(Base):
     permStr = redis.Get(Env.admin_token_prefix+'_perm_'+uid)
     if not permStr : return arr
     # 拆分
-    perm = Util.Explode(permStr, ' ')
+    perm = Util.Explode(' ', permStr)
     for v in perm:
-      tmp = Util.Explode(v, ':')
+      tmp = Util.Explode(':', v)
       arr[tmp[0]] = tmp[1] 
     return arr
   

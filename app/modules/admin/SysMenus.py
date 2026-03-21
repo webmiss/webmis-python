@@ -7,8 +7,8 @@ from app.models.SysMenu import SysMenu
 # 系统菜单
 class SysMenus(Controller):
 
-  _menus: dict = {}          # 全部菜单
-  _permAll: dict = {}        # 用户权限
+  __menus: dict = {}          # 全部菜单
+  __permAll: dict = {}        # 用户权限
 
   # 获取菜单-权限
   def GetMenusPerm(self):
@@ -19,7 +19,7 @@ class SysMenus(Controller):
     msg = TokenAdmin().Verify(token, '')
     if msg != '' : return self.GetJSON({'code':4001})
     # 用户权限
-    self._permAll = TokenAdmin().GetPerm(token)
+    self.__permAll = TokenAdmin().GetPerm(token)
     # 全部菜单
     self._getMenus()
     # 返回
@@ -29,13 +29,13 @@ class SysMenus(Controller):
   # 递归菜单
   def _getMenusPerm(self, fid: str):
     data = []
-    M = self._menus[fid] if fid in self._menus else []
+    M = self.__menus[fid] if fid in self.__menus else []
     for val in M :
       # 菜单权限
       id = str(val['id'])
-      if id not in self._permAll.keys() : continue
+      if id not in self.__permAll.keys() : continue
       # 动作权限
-      perm = int(self._permAll[id])
+      perm = int(self.__permAll[id])
       action = []
       actionArr = []
       actionStr = str(val['action'])
@@ -64,8 +64,8 @@ class SysMenus(Controller):
     m.Order('sort, id')
     data = m.Find()
     # 数据
-    self._menus = {}
+    self.__menus = {}
     for v in data:
       fid = str(v['fid'])
-      if fid in self._menus : self._menus[fid] += [v]
-      else : self._menus[fid] = [v]
+      if fid in self.__menus : self.__menus[fid] += [v]
+      else : self.__menus[fid] = [v]

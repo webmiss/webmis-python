@@ -24,11 +24,11 @@ class Util:
     return str.upper()
   
   # Explode
-  def Explode(str: str, sep: str):
+  def Explode(sep: str, str: str):
     return str.split(sep)
   
   # Implode
-  def Implode(arr: list, sep: str):
+  def Implode(sep: str, arr: list):
     return sep.join(arr)
   
   # JsonEncode
