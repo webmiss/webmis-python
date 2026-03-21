@@ -138,7 +138,7 @@ class User(Controller):
       m.Table('user as a')
       m.LeftJoin('user_info as b', 'a.id=b.uid')
       m.Columns(
-        'FROM_UNIXTIME(a.ltime) as ltime', 'a.tel', 'a.email',
+        'FROM_UNIXTIME(a.ltime, "%%Y-%%m-%%d %%H:%%i:%%s") as ltime', 'a.tel', 'a.email',
         'b.type', 'b.nickname', 'b.department', 'b.position', 'b.name', 'b.gender', 'b.img', 'b.signature', 'FROM_UNIXTIME(b.birthday, "%%Y-%%m-%%d") as birthday'
       )
       m.Where('a.id=%s', tData['uid'])
