@@ -18,7 +18,3 @@ class Env:
   api_token_time: int = 7*24*3600                # 有效时长(7天)
   api_token_auto: bool = True                    # 自动续期
   api_token_sso: bool = True                     # 单点登录
-  supplier_token_prefix: str = 'webmisSupplier'  # 前缀-Supplier
-  supplier_token_time: int = 7*24*3600           # 有效时长(7天)
-  supplier_token_auto: bool = True               # 自动续期
-  supplier_token_sso: bool = True                # 单点登录

@@ -16,7 +16,7 @@ $ cd webmis-python
 # Linux、MacOS
 ./bash install
 
-# Windows 11
+# Windows 11 (自动环境安装和配置)
 .\cmd install
 ```
 
@@ -74,7 +74,6 @@ server {
         add_header 'Access-Control-Allow-Headers' 'Content-Type, Authorization';
         if ($request_method = 'OPTIONS') { return 204; }
     }
-
 }
 ```
 
@@ -102,8 +101,8 @@ webmis-python/
 │    └── View.py                  // 基础视图
 ├── public                         // 静态资源
 ├── uwsgi                          // uWsgi 配置
-├── bash                           // Linux/MacOS 启动脚本
-├── cmd.bat                        // Windows 启动脚本
+├── bash                           // Linux/MacOS 脚本
+├── cmd.bat                        // Windows 脚本
 ├── cli.py                         // 命令行: python cli.py 控制器 函数 参数...
 ├── run_dev.py                     // 热重载( 开发环境 ): python run_dev.py
 └── run.py                         // Web启动文件
