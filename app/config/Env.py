@@ -8,6 +8,7 @@ class Env:
   key: str = 'e4b99adec618e653400966be536c45f8'  # 加密密钥
   password: str = '123456'                       # 默认密码
   # 资源
+  root_dir: str = 'public/'                      # 根目录
   img_url: str = 'https://python.webmis.vip/'
   # Token
   admin_token_prefix: str = 'webmisAdmin'        # 前缀-Admin

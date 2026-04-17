@@ -6,7 +6,7 @@ set s=%1%
 set dev=run_dev.py
 set cli=cli.py
 set python_url=https://www.python.org/ftp/python/3.14.3/python-3.14.3-amd64.exe
-set package=watchdog pymysql redis pyjwt
+set package=watchdog multipart pymysql redis pyjwt
 
 @REM 临时环境变量
 for /f "tokens=2*" %%a in ('reg query "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment" /v Path') do set "SysPath=%%b"

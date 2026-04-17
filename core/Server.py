@@ -2,6 +2,7 @@ from core.Controller import Controller
 from core.Router import Router
 import json, importlib
 import urllib.parse
+from multipart import parse_form_data
 
 # WSGI服务器类
 class WSGIApplication(Controller):
@@ -32,12 +33,20 @@ class WSGIApplication(Controller):
     if environ.get('REQUEST_METHOD') == 'POST':
       content_len = int(environ.get('CONTENT_LENGTH', 0)) if environ.get('CONTENT_LENGTH', 0) else 0
       if content_len > 0:
-        post_raw = environ['wsgi.input'].read(content_len).decode('utf-8')
+        # post_raw = environ['wsgi.input'].read(content_len).decode('utf-8')
+        post_raw = environ['wsgi.input'].read(content_len)
         content_type = environ.get('CONTENT_TYPE', '')
         if 'application/x-www-form-urlencoded' in content_type:
-          post_params = urllib.parse.parse_qs(post_raw)
+          post_params = urllib.parse.parse_qs(post_raw.decode('utf-8'))
         elif 'application/json' in content_type:
-          post_params = json.loads(post_raw) if post_raw else {}
+          post_params = json.loads(post_raw.decode('utf-8')) if post_raw else {}
+        else :
+          print(post_raw)
+          try:
+            post_params, files = parse_form_data(environ)
+            print(post_raw)
+          except Exception as e:
+            pass
     # 缓存到控制器
     Controller.environ = environ
     Controller.post_raw = post_params

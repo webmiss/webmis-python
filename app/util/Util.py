@@ -4,16 +4,19 @@ import json
 class Util:
 
   # Trim
-  def Trim(str: str):
-    return str.strip()
+  def Trim(str: str, cutset: str=None)-> str:
+    if str is None : return ''
+    return str.strip(cutset)
   
   # Ltrim
-  def Ltrim(str: str):
-    return str.lstrip()
+  def Ltrim(str: str, cutset: str=None)-> str:
+    if str is None : return ''
+    return str.lstrip(cutset)
   
   # Rtrim
-  def Rtrim(str: str):
-    return str.rstrip()
+  def Rtrim(str: str, cutset: str=None)-> str:
+    if str is None : return ''
+    return str.rstrip(cutset)
   
   # Lower
   def Lower(str: str):

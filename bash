@@ -6,7 +6,7 @@ app="run.py"                    # 入口文件
 cli="cli.py"                    # 命令行
 dev="run_dev.py"                # 热重启
 log='public/server.log'         # 运行日志
-package="watchdog pymysql redis pyjwt"
+package="watchdog multipart pymysql redis pyjwt"
 # package="python-dateutil flask flask_cors PyJWT redis wheel DBUtils pymysql websockets websocket-client qrcode Image zxing oss2"
 
 # Python环境
