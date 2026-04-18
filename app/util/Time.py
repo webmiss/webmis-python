@@ -1,5 +1,7 @@
 import time
 from datetime import datetime
+from dateutil import parser
+from dateutil.relativedelta import relativedelta
 
 # 时间
 class Time:
@@ -29,3 +31,12 @@ class Time:
     for char in format:
       res.append(replacer.get(char, char))
     return "".join(res)
+
+  # StrToTime
+  def StrToTime(date_time="now", timestamp=None)-> int:
+    if timestamp is not None:
+      dt = datetime.fromtimestamp(int(timestamp))
+    else:
+      dt = parser.parse(date_time)
+    return int(dt.timestamp())
+    
