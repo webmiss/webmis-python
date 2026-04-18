@@ -2,6 +2,7 @@ from core.Controller import Controller
 from app.service.TokenAdmin import TokenAdmin
 from app.config.Env import Env
 from app.librarys.FileEo import FileEo
+from app.librarys.Upload import Upload
 from app.util.Time import Time
 
 # 文件管理
@@ -87,14 +88,31 @@ class SysFile(Controller):
     json = self.Json()
     token: str = self.JsonName(json, 'token')
     path: str = self.JsonName(json, 'path')
-    # file: list = self.JsonName(json, 'file')
     # 验证
     msg = TokenAdmin().Verify(token, self.environ['PATH_INFO'])
     if msg != '' : return self.GetJSON({'code':4001})
-    if not path or not file : return self.GetJSON({'code':4000})
+    if not path : return self.GetJSON({'code':4000})
     # 数据
-    self.Print(path)
-    # FileEo.Root = Env.root_dir + self.__dirRoot
-    # for f in file : FileEo.Upload(path, f)
+    file = self.file_raw['file']
+    img = Upload.File(file, {'path':self.__dirRoot+path, 'bind':None})
+    if not img : return self.GetJSON({'code':5000, 'msg':'上传失败!'})
     # 返回
     return self.GetJSON({'code':0})
+  
+  # 下载
+  def Down(self):
+    # 参数
+    json = self.Json()
+    token: str = self.JsonName(json, 'token')
+    path: str = self.JsonName(json, 'path')
+    filename: str = self.JsonName(json, 'filename')
+    # 验证
+    msg = TokenAdmin().Verify(token, self.environ['PATH_INFO'])
+    if msg != '' : return self.GetJSON({'code':4001})
+    if not path or not filename : return self.GetJSON({'code':4000})
+    # 数据
+    FileEo.Root = Env.root_dir + self.__dirRoot
+    data = FileEo.Bytes(path + filename)
+    # 返回
+    self.GetJSON()
+    return data, 200, [('Content-Type', 'application/octet-stream')]

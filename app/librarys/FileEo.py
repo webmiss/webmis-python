@@ -105,10 +105,11 @@ class FileEo:
     return True if not os.rename(src,dst) else False
 
   # 上传
-  def Upload(tmp, to: str):
+  def Upload(file, to: str)-> bool:
     to = FileEo.Root+to
-    if tmp.save(to)==None : return True
-    return False
+    with open(to, "wb") as f:
+      f.write(file.raw)
+    return True
 
   # 写入
   def Writer(file: str='', content: str='', type: str='wb'):
@@ -129,6 +130,7 @@ class FileEo:
   # 读取
   def Bytes(file: str, type: str='rb'):
     dst = FileEo.Root+file
+    print(dst)
     with open(dst, type) as f: return f.read()
 
   # 删除(文件夹&文件)

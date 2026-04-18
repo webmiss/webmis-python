@@ -8,6 +8,7 @@ class Controller(Base):
   environ: dict = {}    # 环境变量
   get_raw: dict = {}    # Get参数
   post_raw: dict = {}   # Post参数
+  file_raw: dict = {}   # 文件参数
 
   # 资源地址
   def BaseUrl(self, url: str) -> str:

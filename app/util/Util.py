@@ -49,4 +49,11 @@ class Util:
     except Exception as e:
       print(e)
       return {}
+    
+  # 合并数组
+  def ArrayMerge(*arrays: dict):
+    res = {}
+    for arr in arrays :
+      for k,v in arr.items() : res[k] = v
+    return res
  

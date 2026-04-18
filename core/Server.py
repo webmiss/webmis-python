@@ -29,27 +29,27 @@ class WSGIApplication(Controller):
     # Get 参数
     Controller.get_raw = urllib.parse.parse_qs(environ.get('QUERY_STRING', ''))
     # Post 参数
-    post_params = {}
+    post_params = file_params = {}
     if environ.get('REQUEST_METHOD') == 'POST':
       content_len = int(environ.get('CONTENT_LENGTH', 0)) if environ.get('CONTENT_LENGTH', 0) else 0
       if content_len > 0:
         # post_raw = environ['wsgi.input'].read(content_len).decode('utf-8')
-        post_raw = environ['wsgi.input'].read(content_len)
         content_type = environ.get('CONTENT_TYPE', '')
         if 'application/x-www-form-urlencoded' in content_type:
-          post_params = urllib.parse.parse_qs(post_raw.decode('utf-8'))
+          post_raw = environ['wsgi.input'].read(content_len).decode('utf-8')
+          post_params = urllib.parse.parse_qs(post_raw)
         elif 'application/json' in content_type:
-          post_params = json.loads(post_raw.decode('utf-8')) if post_raw else {}
+          post_raw = environ['wsgi.input'].read(content_len).decode('utf-8')
+          post_params = json.loads(post_raw) if post_raw else {}
         else :
-          print(post_raw)
           try:
-            post_params, files = parse_form_data(environ)
-            print(post_raw)
+            post_params, file_params = parse_form_data(environ)
           except Exception as e:
             pass
     # 缓存到控制器
     Controller.environ = environ
     Controller.post_raw = post_params
+    Controller.file_raw = file_params
    
     try:
       # 动态控制器类
