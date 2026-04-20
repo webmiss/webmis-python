@@ -6,6 +6,8 @@ from app.librarys.Upload import Upload
 from app.util.Util import Util
 from app.util.Time import Time
 
+from app.models.User import User
+
 # 系统用户
 class SysUser(Controller):
 
@@ -21,10 +23,21 @@ class SysUser(Controller):
     if not data : return self.GetJSON({'code':4000})
     # 条件
     where = self.__getWhere(data)
+    # 统计
+    m = User()
+    m.Table('user as a')
+    m.LeftJoin('user_info as b', 'a.id=b.uid')
+    m.LeftJoin('sys_perm as c', 'a.id=c.uid')
+    m.LeftJoin('sys_role as d', 'c.role=d.id')
+    m.Columns('count(*) AS total')
+    m.Where(where)
+    one = m.FindFirst()
     # 数据
-    list = []
+    total = {'total':0}
+    if one : total['total'] = int(one['total'])
+    self.Print(one)
     # 返回
-    return self.GetJSON({'code':0, 'time':Time.Date('Y-m-d H:i:s'), 'data': list})
+    return self.GetJSON({'code':0, 'time':Time.Date('Y-m-d H:i:s'), 'data': total})
 
   # 列表
   def List(self):
@@ -41,9 +54,24 @@ class SysUser(Controller):
     if not data or not page or not limit : return self.GetJSON({'code':4000})
     # 条件
     where = self.__getWhere(data)
-    self.Print(where)
+    # 查询
+    m = User()
+    m.Table('user as a')
+    m.LeftJoin('user_info as b', 'a.id=b.uid')
+    m.LeftJoin('sys_perm as c', 'a.id=c.uid')
+    m.LeftJoin('sys_role as d', 'c.role=d.id')
+    m.Columns(
+      'a.id', 'a.uname', 'a.email', 'a.tel', 'a.status', 'FROM_UNIXTIME(a.rtime, "%%Y-%%m-%%d %%H:%%i:%%s") as rtime', 'FROM_UNIXTIME(a.ltime, "%%Y-%%m-%%d %%H:%%i:%%s") as ltime', 'FROM_UNIXTIME(a.utime, "%%Y-%%m-%%d %%H:%%i:%%s") as utime',
+      'b.type', 'b.nickname', 'b.department', 'b.position', 'b.name', 'b.gender', 'b.img', 'b.remark', 'FROM_UNIXTIME(b.birthday, "%%Y-%%m-%%d") as birthday',
+      'c.role', 'c.perm',
+      'd.name as role_name',
+    )
+    m.Where(where)
+    m.Order(order if order else 'a.ltime DESC')
+    m.Page(page, limit)
+    list = m.Find()
     # 数据
-    list = []
+    self.Print(list)
     # 返回
     return self.GetJSON({'code':0, 'time':Time.Date('Y-m-d H:i:s'), 'data': list})
   
@@ -54,5 +82,8 @@ class SysUser(Controller):
     stime = d['stime'] if d.get('stime') else Time.Date('Y-m-d')
     start = Time.StrToTime(stime+' 00:00:00')
     where.append('a.ltime>='+str(start))
+    etime = d['etime'] if d.get('etime') else Time.Date('Y-m-d')
+    end = Time.StrToTime(etime+' 23:59:59')
+    where.append('a.ltime<='+str(end))
     # 结果
     return Util.Implode(' AND ', where)

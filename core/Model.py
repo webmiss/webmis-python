@@ -160,7 +160,7 @@ class Model(Base):
     return self.__sql, args
   
   # 查询-多条
-  def Find(self, sql: str = '', *args) :
+  def Find(self, sql: str='', *args)-> list :
     # SQL
     if sql == '':
       sql, args = self.SelectSQL()
@@ -183,7 +183,7 @@ class Model(Base):
     return res
 
   # 查询-单条
-  def FindFirst(self, sql: str = '', *args) -> any :
+  def FindFirst(self, sql: str='', *args) -> dict :
     # SQL
     if sql == '':
       self.Limit(0, 1)
