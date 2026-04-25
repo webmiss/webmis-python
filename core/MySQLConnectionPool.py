@@ -1,123 +1,118 @@
-import pymysql
+from core.Base import Base
+from app.config.Db import Db
 import queue
 import threading
-from typing import Optional
-from core.Base import Base
+import pymysql
 
 # MySQL 连接池
 class MySQLConnectionPool(Base):
 
-  name: str = 'Pool'                      # 名称
-  db_config: dict = {}                    # 数据库配置
-  idle_connections: queue.Queue = None    # 连接队列
-  total_connections: int = 0              # 已创建连接数
-  max_size: int = 0                       # 最大连接数
-  
-  # 构造函数
-  def __init__(self, cfg: dict):
-    # 初始化
-    if cfg['poolInitSize'] > cfg['poolMaxSize']:
-      cfg['poolMaxSize'] = cfg['poolInitSize']
-    # 数据库配置
-    self.db_config = {
-      'host': cfg['host'],
-      'port': int(cfg['port']),
-      'user': cfg['user'],
-      'passwd': cfg['password'],
-      'database': cfg['database'],
-      'charset': cfg['charset'],
-      'autocommit': cfg['autocommit'],
+  name: str = 'MariaDB'                   # 名称
+  pool_default: queue.Queue = None        # 连接池: default
+  pool_other: queue.Queue = None          # 连接池: other
+  __db: str = 'default'                   # 数据库
+  __db_config: dict = {}                  # 数据库配置
+  __max_size: int = 0                     # 最大连接数
+  __maxWait: int = 3                      # 最大等待时间( 秒 )
+
+  # 数据源
+  def InitPool(self, name: str):
+    self.__db = name
+    # 配置
+    config = Db().Config(name)
+    self.__max_size = config['poolMaxSize']
+    self.__db_config = {
+      'host': config['host'],
+      'port': int(config['port']),
+      'user': config['user'],
+      'passwd': config['password'],
+      'database': config['database'],
+      'charset': config['charset'],
+      'autocommit': config['autocommit'],
     }
-    # 线程队列存储空闲连接
-    self.idle_connections = queue.Queue(maxsize=cfg['poolMaxSize'])
-    self.max_size = cfg['poolMaxSize']
-    # 已创建连接数
-    self.total_connections = 0
-    self.lock = threading.Lock()
     # 初始化连接池
-    for _ in range(cfg['poolInitSize']):
-      conn = self._create_connection()
+    if name=='default' and MySQLConnectionPool.pool_default!=None : return
+    if name=='other' and not MySQLConnectionPool.pool_other!=None : return
+    # 初始化锁
+    self.lock = threading.Lock()
+    # 创建连接池
+    if name=='default' : MySQLConnectionPool.pool_default = queue.Queue(maxsize=self.__max_size)
+    if name=='other' : MySQLConnectionPool.pool_other = queue.Queue(maxsize=self.__max_size)
+    # 初始化连接数
+    for _ in range(config['poolInitSize']):
+      conn = self.CreateConnection(self.__db_config)
       if conn:
-        self.idle_connections.put(conn)
-        with self.lock:
-          self.total_connections += 1
+        if name=='default' : MySQLConnectionPool.pool_default.put(conn)
+        if name=='other' : MySQLConnectionPool.pool_other.put(conn)
+    with self.lock:
+      self.Print(f"[ {self.name} ] MariaDB Pool:", name, self.GetIdleCount())
 
-  # 连接数据库
-  def _create_connection(self) -> Optional[pymysql.Connection]:
+  # 创建连接
+  def CreateConnection(self, config: dict) -> pymysql.Connection:
     try:
-      return pymysql.connect(**self.db_config)
+      return pymysql.connect(**config)
     except Exception as e:
-      self.Print(f"[ {self.name} ] Error connecting to database: {e}")
-      return None
+      self.Print(f"[ {self.name} ] CreateConnection:", e)
 
-  # 验证连接是否有效
-  def _is_connection_valid(self, conn: pymysql.connections.Connection) -> bool:
-    if conn is None:
-      return False
-    try:
-      with conn.cursor() as cursor:
-        cursor.execute("SELECT 1")
-      return True
-    except pymysql.MySQLError:
-      return False
+  # 默认连接池
+  def GetIdleConnections(self) -> queue.Queue:
+    if self.__db == 'default' : return MySQLConnectionPool.pool_default
+    elif self.__db == 'other' : return MySQLConnectionPool.pool_other
+    return None
 
   # 获取连接
-  def getConnection(self, timeout: float = 5.0) -> Optional[pymysql.connections.Connection]:
+  def GetConnection(self) -> pymysql.Connection:
+    idleConnections = self.GetIdleConnections()
+    if idleConnections is None: return None
+    # 连接
+    conn = None
     try:
-      # 从空闲连接队列中获取连接
-      conn = self.idle_connections.get(timeout=timeout)
-      if not self._is_connection_valid(conn):
-        conn.close()
-        conn = self._create_connection()
-      return conn
-    except queue.Empty:
-      # 如果队列为空，则尝试创建新的连接
-      with self.lock:
-        if self.total_connections < self.max_size:
-          conn = self._create_connection()
-          if conn:
-            self.total_connections += 1
-            return conn
-      self.Print(f"[ {self.name} ] 连接池已满（最大{self.max_size}），获取连接超时")
-      return None
-
-  # 归还连接
-  def releaseConnection(self, conn: pymysql.connections.Connection) -> None:
-    if conn is None:
-      return None
-    try:
-      # 校验连接有效性
-      if not self._is_connection_valid(conn):
-        conn.close()
-        with self.lock: self.total_connections -= 1
-        return None
-      # 尝试放回队列
-      if not self.idle_connections.full():
-        self.idle_connections.put(conn)
+      conn = idleConnections.get(timeout=self.__maxWait)
+      if conn.open and conn.ping(reconnect=False) is None:
+        return conn
       else:
         conn.close()
-        with self.lock: self.total_connections -= 1
-    except pymysql.MySQLError as e:
-      print(f"[ {self.name} ] 归还连接失败: {e}")
-      conn.close()
-      try:
+      # 创建连接
+      if self.GetIdleCount() < self.__max_size:
+        newConn = self.CreateConnection(self.__db_config)
+        return newConn
+      else:
+        raise Exception(f"[ {self.name} ] Connection pool is full, timeout while acquiring idle connection.")
+    except Exception as e:
+      self.Print(f"[ {self.name} ] GetConnection: {e}")
+    return conn
+
+  # 归还连接
+  def ReleaseConnection(self, conn: pymysql.Connection) -> bool:
+    idleConnections = self.GetIdleConnections()
+    if idleConnections is None: return False
+    try:
+      if conn.open and conn.ping(reconnect=False) is None:
+        idleConnections.put(conn)
+      else:
         conn.close()
-        with self.lock: self.total_connections -= 1
-      except:
-        pass
+    except Exception as e:
+      self.Print(f"[ {self.name} ] ReleaseConnection: {e}")
+    return True
 
   # 获取空闲连接数
-  def get_idle_count(self) -> int:
-    return self.idle_connections.qsize()          
-
+  def GetIdleCount(self) -> int:
+    idleConnections = self.GetIdleConnections()
+    if idleConnections is None: return 0
+    return idleConnections.qsize()
+  
   # 销毁连接池
-  def destroy(self) -> None:
-    while not self.idle_connections.empty():
-      try:
-        conn = self.idle_connections.get_nowait()
-        if conn and not conn._closed: conn.close()
-      except queue.Empty:
-        break
-      except pymysql.MySQLError as e:
-        print(f"[ {self.name} ] 关闭连接失败: {e}")
-    with self.lock: self.total_connections = 0
+  def Destroy(self) -> None:
+    try:
+      # 连接池: default
+      while not MySQLConnectionPool.pool_default.empty():
+        conn = MySQLConnectionPool.pool_default.get()
+        if conn is not None: conn.close()
+      MySQLConnectionPool.pool_default = None
+      # 连接池: other
+      while not MySQLConnectionPool.pool_other.empty():
+        conn = MySQLConnectionPool.pool_other.get()
+        if conn is not None: conn.close()
+      MySQLConnectionPool.pool_other = None
+    except Exception as e:
+      self.Print(f"[ {self.name} ] Destroy: {e}")

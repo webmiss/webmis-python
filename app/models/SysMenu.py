@@ -5,5 +5,5 @@ class SysMenu(Model):
 
   # 构造函数
   def __init__(self):
-    self.DBConn('default')
+    self.DBConfig('default')
     self.Table('sys_menus')

@@ -1,13 +1,10 @@
 from pymysql import Error
 from core.Base import Base
-from app.config.Db import Db
 from core.MySQLConnectionPool import MySQLConnectionPool
 
 # 模型
 class Model(Base):
 
-  pool: object = None   # 连接池
-  conn: object = None   # 连接
   __name: str = 'Model' # 名称
   __db: str = 'default' # 数据库
   __table: str = ''     # 数据表
@@ -26,24 +23,17 @@ class Model(Base):
   __nums: int = 0       # 影响行数
 
   # 获取连接
-  def DBConn(self, name: str='') -> object :
-    # 默认值
-    self.__db = 'default' if name=='' else name
-    # 配置
-    cfg = Db().Config(name)
-    # 连接池
-    if Model.pool is None:
-      Model.pool = MySQLConnectionPool(cfg)
-    # 创建连接
-    if self.conn is None:
-      try:
-        self.conn = Model.pool.getConnection(cfg['poolMaxWait'])
-      except Error as e:
-        self.Print('[ '+self.__name+' ] Conn:', e)
-    return self.conn
+  def DBConn(self, name: str='')-> object:
+    # 数据库
+    self.__db = name if name!='' else self.__db
+    # 初始化连接池
+    MySQLConnectionPool().InitPool(self.__db)
+    # 获取连接
+    conn = MySQLConnectionPool().GetConnection()
+    return conn
   
   # 执行SQL
-  def Exec(self, conn: object, sql: str, args: tuple = ()) -> any :
+  def Exec(self, conn: object, sql: str, args: tuple = ())-> any :
     with conn.cursor() as cursor:
       try:
         cursor.execute(sql, args)
@@ -55,78 +45,84 @@ class Model(Base):
     return None
 
   # 关闭
-  def Close(self) -> None:
-    if Model.pool is not None:
-      Model.pool.releaseConnection(self.conn)
+  def Close(self, conn)-> None:
+    if conn is None: return
+    res = MySQLConnectionPool().ReleaseConnection(conn)
+    if not res:
+      self.Print('[ '+self.__name+' ] Close:', '关闭失败')
 
   # 获取-SQL
-  def GetSql(self) -> str :
+  def GetSql(self)-> str :
     return self.__sql
   
   # 获取-自增ID
-  def GetID(self) -> int:
+  def GetID(self)-> int:
     return self.__id
   
   # 获取-影响行数
-  def GetNums(self) -> int:
+  def GetNums(self)-> int:
     return self.__nums
 
+  # 数据库
+  def DBConfig(self, name: str = '')-> None:
+    self.__db = name
+
   # 表
-  def Table(self, table: str = '') -> None:
+  def Table(self, table: str = '')-> None:
     self.__table = table
 
   # 分区
-  def Partition(self, *partition: str) -> None:
+  def Partition(self, *partition: str)-> None:
     self.__table += ' PARTITION('+','.join(partition)+')'
 
   # 关联-INNER
-  def Join(self, table: str = '', on: str = '') -> None:
+  def Join(self, table: str = '', on: str = '')-> None:
     self.__table += ' INNER JOIN '+table+' ON '+on
 
   # 关联-LEFT
-  def LeftJoin(self, table: str = '', on: str = '') -> None:
+  def LeftJoin(self, table: str = '', on: str = '')-> None:
     self.__table += ' LEFT JOIN '+table+' ON '+on
 
   # 关联-RIGHT
-  def RightJoin(self, table: str = '', on: str = '') -> None:
+  def RightJoin(self, table: str = '', on: str = '')-> None:
     self.__table += ' RIGHT JOIN '+table+' ON '+on
 
   # 关联-FULL
-  def FullJoin(self, table: str = '', on: str = '') -> None:
+  def FullJoin(self, table: str = '', on: str = '')-> None:
     self.__table += ' FULL JOIN '+table+' ON '+on
 
   # 字段
-  def Columns(self, *fields: str) -> None:
+  def Columns(self, *fields: str)-> None:
     self.__columns = ','.join(fields)
 
   # 条件
-  def Where(self, where: str, *args) -> None:
+  def Where(self, where: str, *args)-> None:
     if where == '' : return
     self.__where = ' WHERE '+where
     self.__args += args
 
   # 分组
-  def Group(self, *group: str) -> None:
+  def Group(self, *group: str)-> None:
     self.__group = ' GROUP BY '+','.join(group)
 
   # 筛选
-  def Having(self, having: str) -> None:
+  def Having(self, having: str)-> None:
     self.__having = ' HAVING '+having
 
   # 排序
-  def Order(self, *order: str) -> None:
+  def Order(self, *order: str)-> None:
     self.__order = ' ORDER BY '+','.join(order)
 
   # 限制
-  def Limit(self, start: int, limit: int) -> None:
+  def Limit(self, start: int, limit: int)-> None:
     self.__limit = ' LIMIT '+str(start)+','+str(limit)
 
   # 分页
-  def Page(self, page: int, limit: int) -> None:
+  def Page(self, page: int, limit: int)-> None:
     self.__limit = ' LIMIT '+str((page - 1) * limit)+','+str(limit)
 
   # 查询-SQL
-  def SelectSQL(self) -> tuple[str, tuple] :
+  def SelectSQL(self)-> tuple[str, tuple] :
     # 验证
     if self.__table == '' :
       self.Print('[ '+self.__name+' ]', 'Select: 表不能为空!')
@@ -166,14 +162,15 @@ class Model(Base):
       sql, args = self.SelectSQL()
       if sql == '' : return None
     # 连接
-    if self.conn is None : self.DBConn(self.__db)
+    conn = self.DBConn()
+    if conn is None : return []
     # 执行
     res = []
-    cs = self.Exec(self.conn, sql, args)
-    if cs is None : return None
+    cs = self.Exec(conn, sql, args)
+    if cs is None : return []
     data = cs.fetchall()
     cs.close()
-    self.Close()
+    self.Close(conn)
     # 结果
     for d in data :
       row = {}
@@ -183,21 +180,22 @@ class Model(Base):
     return res
 
   # 查询-单条
-  def FindFirst(self, sql: str='', *args) -> dict :
+  def FindFirst(self, sql: str='', *args)-> dict :
     # SQL
     if sql == '':
       self.Limit(0, 1)
       sql, args = self.SelectSQL()
       if sql == '' : return None
     # 连接
-    if self.conn is None : self.DBConn(self.__db)
+    conn = self.DBConn()
+    if conn is None : return None
     # 执行
     res = {}
-    cs = self.Exec(self.conn, sql, args)
+    cs = self.Exec(conn, sql, args)
     if cs is None : return None
     data = cs.fetchone()
     cs.close()
-    self.Close()
+    self.Close(conn)
     # 结果
     if data is None : return None
     for i,v in enumerate(data) :
@@ -232,7 +230,7 @@ class Model(Base):
     self.__values = ','.join(vals)
 
   # 添加-SQL
-  def InsertSQL(self) -> tuple[str, tuple]:
+  def InsertSQL(self)-> tuple[str, tuple]:
     # 验证
     if self.__table == '' :
       self.Print('[ '+self.__name+' ]', 'Insert: 表不能为空')
@@ -252,18 +250,19 @@ class Model(Base):
     return self.__sql, args
   
   # 添加-执行
-  def Insert(self, sql: str = '', *args) -> int :
+  def Insert(self, sql: str = '', *args)-> int :
     # SQL
     if sql == '':
       sql, args = self.InsertSQL()
     # 连接
-    if self.conn is None : self.DBConn(self.__db)
+    conn = self.DBConn()
+    if conn is None : return -1
     # 执行
-    cs = self.Exec(self.conn, sql, args)
+    cs = self.Exec(conn, sql, args)
     if cs is None : return -1
     self.__id = cs.lastrowid
     cs.close()
-    self.Close()
+    self.Close(conn)
     return self.__id
 
   # 更新-数据
@@ -277,7 +276,7 @@ class Model(Base):
     self.__data = ','.join(vals)
 
   # 更新-SQL
-  def UpdateSQL(self) -> tuple[str, tuple]:
+  def UpdateSQL(self)-> tuple[str, tuple]:
     # 验证
     if self.__table == '' :
       self.Print('[ '+self.__name+' ]', 'Update: 表不能为空')
@@ -301,21 +300,22 @@ class Model(Base):
     return self.__sql, args
 
   # 更新-执行
-  def Update(self, sql: str = '', *args) -> bool :
+  def Update(self, sql: str = '', *args)-> bool :
     # SQL
     if sql == '':
       sql, args = self.UpdateSQL()
     # 连接
-    if self.conn is None : self.DBConn(self.__db)
+    conn = self.DBConn()
+    if conn is None : return False
     # 执行
-    cs = self.Exec(self.conn, sql, args)
+    cs = self.Exec(conn, sql, args)
     if cs is None : return False
     cs.close()
-    self.Close()
+    self.Close(conn)
     return True
 
   # 删除-SQL
-  def DeleteSQL(self) -> tuple[str, tuple]:
+  def DeleteSQL(self)-> tuple[str, tuple]:
     # 验证
     if self.__table == '' :
       self.Print('[ '+self.__name+' ]', 'Delete: 表不能为空')
@@ -335,15 +335,16 @@ class Model(Base):
     return self.__sql, args
 
   # 删除-执行
-  def Delete(self, sql: str = '', *args) -> bool :
+  def Delete(self, sql: str = '', *args)-> bool :
     # SQL
     if sql == '':
       sql, args = self.DeleteSQL()
     # 连接
-    if self.conn is None : self.DBConn(self.__db)
+    conn = self.DBConn()
+    if conn is None : return False
     # 执行
-    cs = self.Exec(self.conn, sql, args)
+    cs = self.Exec(conn, sql, args)
     if cs is None : return False
     cs.close()
-    self.Close()
+    self.Close(conn)
     return True
