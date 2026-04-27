@@ -25,7 +25,7 @@ class Model(Base):
   # 获取连接
   def DBConn(self, name: str='')-> object:
     # 数据库
-    self.__db = self.__db if name=='' else name
+    if name!='': self.__db = name
     # 初始化连接池
     MySQLConnectionPool().InitPool(self.__db)
     # 获取连接
