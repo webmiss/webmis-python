@@ -25,7 +25,7 @@ class Model(Base):
   # 获取连接
   def DBConn(self, name: str='')-> object:
     # 数据库
-    self.__db = name if name!='' else self.__db
+    self.__db = self.__db if name=='' else name
     # 初始化连接池
     MySQLConnectionPool().InitPool(self.__db)
     # 获取连接
@@ -167,7 +167,9 @@ class Model(Base):
     # 执行
     res = []
     cs = self.Exec(conn, sql, args)
-    if cs is None : return []
+    if cs is None :
+      self.Close(conn)
+      return []
     data = cs.fetchall()
     cs.close()
     self.Close(conn)
@@ -192,7 +194,9 @@ class Model(Base):
     # 执行
     res = {}
     cs = self.Exec(conn, sql, args)
-    if cs is None : return None
+    if cs is None :
+      self.Close(conn)
+      return None
     data = cs.fetchone()
     cs.close()
     self.Close(conn)
@@ -259,7 +263,9 @@ class Model(Base):
     if conn is None : return -1
     # 执行
     cs = self.Exec(conn, sql, args)
-    if cs is None : return -1
+    if cs is None :
+      self.Close(conn)
+      return -1
     self.__id = cs.lastrowid
     cs.close()
     self.Close(conn)
@@ -309,7 +315,9 @@ class Model(Base):
     if conn is None : return False
     # 执行
     cs = self.Exec(conn, sql, args)
-    if cs is None : return False
+    if cs is None :
+      self.Close(conn)
+      return False
     cs.close()
     self.Close(conn)
     return True
@@ -344,7 +352,9 @@ class Model(Base):
     if conn is None : return False
     # 执行
     cs = self.Exec(conn, sql, args)
-    if cs is None : return False
+    if cs is None :
+      self.Close(conn)
+      return False
     cs.close()
     self.Close(conn)
     return True

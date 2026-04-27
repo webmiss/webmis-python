@@ -13,9 +13,10 @@ class Redis(Base):
 
   # 构造函数
   def __init__(self, name: str = "default"):
-    self.__db = name
+    # 数据库
+    if name!='' : self.__db = name
     # 配置
-    cfg = RedisCfg().Config(name)
+    cfg = RedisCfg().Config(self.__db)
     # 初始化连接池
     if name=='default' and Redis.pool_default!=None : return
     if name=='other' and not Redis.pool_other!=None : return
@@ -57,14 +58,14 @@ class Redis(Base):
     conn = self.RedisConn()
     if conn is None: return 0
     res = conn.incr(key)
-    return res
+    return res if res else 0
 
   # 自减
   def Decr(self, key: str)-> int:
     conn = self.RedisConn()
     if conn is None: return 0
     res = conn.decr(key)
-    return res
+    return res if res else 0
 
   # 获取
   def Get(self, key: str)-> str:
@@ -85,7 +86,7 @@ class Redis(Base):
     conn = self.RedisConn()
     if conn is None: return False
     res = conn.exists(key)
-    return res
+    return True if res else False
 
   # 设置过期时间(秒)
   def Expire(self, key: str, time: int = 0)-> bool:
@@ -99,14 +100,14 @@ class Redis(Base):
     conn = self.RedisConn()
     if conn is None: return 0
     res = conn.ttl(key)
-    return res
+    return res if res else 0
 
   # 获取长度
-  def Len(self, key: str)-> int:
+  def StrLen(self, key: str)-> int:
     conn = self.RedisConn()
     if conn is None: return 0
-    res = conn.llen(key)
-    return res
+    res = conn.strlen(key)
+    return res if res else 0
 
   # 哈希(Hash)-添加
   def HSet(self, key: str, field: str, value: str)-> bool:
@@ -162,7 +163,7 @@ class Redis(Base):
     conn = self.RedisConn()
     if conn is None: return 0
     res = conn.hlen(key)
-    return res
+    return res if res else 0
 
   # 列表(List)-添加
   def LPush(self, key: str, value: str)-> bool:

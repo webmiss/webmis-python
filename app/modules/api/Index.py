@@ -9,12 +9,13 @@ class Index(Controller):
   # 首页
   def Index(self):
     # 查询
-    # m = User()
-    # m.Columns('id', 'uname')
-    # data = m.Find()
+    m = User()
+    m.Columns('id', 'uname')
+    data = m.Find()
+    self.Print('Model:', data)
     # Redis
     r = Redis()
     r.Set('test', 'Python Redis')
-    self.Print('Test:', r.Get('test'))
+    self.Print('Redis:', r.Get('test'))
     # 返回
     return self.GetJSON({'code':0, 'msg':'Python Api'})

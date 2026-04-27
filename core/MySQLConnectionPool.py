@@ -40,7 +40,7 @@ class MySQLConnectionPool(Base):
     if name=='other' : MySQLConnectionPool.pool_other = queue.Queue(maxsize=self.__max_size)
     # 初始化连接数
     for _ in range(config['poolInitSize']):
-      conn = self.CreateConnection(self.__db_config)
+      conn = self.CreateConnection()
       if conn:
         if name=='default' : MySQLConnectionPool.pool_default.put(conn)
         if name=='other' : MySQLConnectionPool.pool_other.put(conn)
@@ -48,9 +48,9 @@ class MySQLConnectionPool(Base):
       self.Print(f"[ {self.name} ] MariaDB Pool:", name, self.GetIdleCount())
 
   # 创建连接
-  def CreateConnection(self, config: dict) -> pymysql.Connection:
+  def CreateConnection(self) -> pymysql.Connection:
     try:
-      return pymysql.connect(**config)
+      return pymysql.connect(**self.__db_config)
     except Exception as e:
       self.Print(f"[ {self.name} ] CreateConnection:", e)
 
@@ -62,19 +62,19 @@ class MySQLConnectionPool(Base):
 
   # 获取连接
   def GetConnection(self) -> pymysql.Connection:
-    idleConnections = self.GetIdleConnections()
-    if idleConnections is None: return None
+    idle = self.GetIdleConnections()
+    if idle is None: return None
     # 连接
     conn = None
     try:
-      conn = idleConnections.get(timeout=self.__maxWait)
+      conn = idle.get(timeout=self.__maxWait)
       if conn.open and conn.ping(reconnect=False) is None:
         return conn
       else:
         conn.close()
       # 创建连接
       if self.GetIdleCount() < self.__max_size:
-        newConn = self.CreateConnection(self.__db_config)
+        newConn = self.CreateConnection()
         return newConn
       else:
         raise Exception(f"[ {self.name} ] Connection pool is full, timeout while acquiring idle connection.")
@@ -84,11 +84,11 @@ class MySQLConnectionPool(Base):
 
   # 归还连接
   def ReleaseConnection(self, conn: pymysql.Connection) -> bool:
-    idleConnections = self.GetIdleConnections()
-    if idleConnections is None: return False
+    idle = self.GetIdleConnections()
+    if idle is None: return False
     try:
       if conn.open and conn.ping(reconnect=False) is None:
-        idleConnections.put(conn)
+        idle.put(conn)
       else:
         conn.close()
     except Exception as e:
@@ -97,9 +97,9 @@ class MySQLConnectionPool(Base):
 
   # 获取空闲连接数
   def GetIdleCount(self) -> int:
-    idleConnections = self.GetIdleConnections()
-    if idleConnections is None: return 0
-    return idleConnections.qsize()
+    idle = self.GetIdleConnections()
+    if idle is None: return 0
+    return idle.qsize()
   
   # 销毁连接池
   def Destroy(self) -> None:
