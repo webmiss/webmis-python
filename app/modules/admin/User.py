@@ -4,6 +4,7 @@ from app.config.Env import Env
 from app.service.TokenAdmin import TokenAdmin
 from app.service.Data import Data
 from app.librarys.Safety import Safety
+from app.librarys.Captcha import Captcha
 from app.util.Util import Util
 from app.util.Time import Time
 from app.util.Hash import Hash
@@ -144,3 +145,18 @@ class User(Controller):
       uinfo['img'] = Data().Img(str(uinfo['img']))
     # 返回
     return self.GetJSON({'code':0, 'data':{'token_time':int(tData['time']), 'uinfo':uinfo, 'isPasswd':tData['isPasswd']}})
+
+  # 验证码-图形
+  def Vcode(self, uname: str):
+    # 生成
+    code, img = Captcha.Vcode()
+    # 缓存
+    redis = Redis()
+    redis.Set(Env.admin_token_prefix+'_vcode_'+uname, Util.Lower(code))
+    redis.Expire(Env.admin_token_prefix+'_vcode_'+uname, 24*3600)
+    # 返回
+    return img, 200, [('Content-Type', 'image/jpeg')]
+
+  # 验证码-数字
+  def VcodeNum(self):
+    pass
