@@ -130,7 +130,6 @@ class FileEo:
   # 读取
   def Bytes(file: str, type: str='rb'):
     dst = FileEo.Root+file
-    print(dst)
     with open(dst, type) as f: return f.read()
 
   # 删除(文件夹&文件)

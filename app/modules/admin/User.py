@@ -150,12 +150,12 @@ class User(Controller):
   def Vcode(self, uname: str):
     # 生成
     code, img = Captcha.Vcode()
-    # 缓存
+    # 缓存(24小时)
     redis = Redis()
     redis.Set(Env.admin_token_prefix+'_vcode_'+uname, Util.Lower(code))
     redis.Expire(Env.admin_token_prefix+'_vcode_'+uname, 24*3600)
     # 返回
-    return img, 200, [('Content-Type', 'image/jpeg')]
+    return self.GetFile(img, [('Content-Type', 'image/jpeg')])
 
   # 验证码-数字
   def VcodeNum(self):

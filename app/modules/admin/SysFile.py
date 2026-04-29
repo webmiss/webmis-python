@@ -114,5 +114,4 @@ class SysFile(Controller):
     FileEo.Root = Env.root_dir + self.__dirRoot
     data = FileEo.Bytes(path + filename)
     # 返回
-    self.GetJSON()
-    return data, 200, [('Content-Type', 'application/octet-stream')]
+    self.GetFile(data, [('Content-Type', 'application/octet-stream')])

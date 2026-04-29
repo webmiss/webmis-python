@@ -47,6 +47,11 @@ class Controller(Base):
       data['msg'] = self.GetLang('code_'+str(data['code']))
     # 返回
     return json.dumps(data).encode('utf-8'), status, headers
+  
+  # 返回文件
+  def GetFile(self, data: bytes, header: dict=[]) -> tuple :
+    # 返回
+    return data, 200, header
 
   # Get参数
   def Get(self, name: str):
